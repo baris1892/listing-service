@@ -1,0 +1,32 @@
+spring:
+  main:
+    banner-mode: console
+  output:
+    ansi:
+      enabled: always
+  application:
+    name: listing-service
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,mappings,prometheus
+  endpoint:
+    health:
+      show-details: always
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: listing-service
+
+server:
+  error:
+    include-stacktrace: always
+    include-message: always
+    include-exception: true
+    whitelabel:
+      enabled: false

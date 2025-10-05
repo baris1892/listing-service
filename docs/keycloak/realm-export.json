@@ -63,16 +63,8 @@
         "composite": true,
         "composites": {
           "realm": [
-            "ROLE_USER",
-            "offline_access",
-            "uma_authorization"
-          ],
-          "client": {
-            "account": [
-              "manage-account",
-              "view-profile"
-            ]
-          }
+            "ROLE_USER"
+          ]
         },
         "clientRole": false,
         "containerId": "47bf5779-ee4c-4510-a70f-1e80bcbef182",

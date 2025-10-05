@@ -1,0 +1,13 @@
+spring:
+  main:
+    banner-mode: off
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI}
+
+logging:
+  # adjusted pattern to make logs more readable on dev
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %clr(%-5level) %clr(%logger{20}){cyan} %n\t%msg%n%n"
