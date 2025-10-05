@@ -1,0 +1,15 @@
+spring:
+  profiles:
+    active: test
+
+  main:
+    banner-mode: off
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %clr(%-5level) %clr(%logger{20}){cyan} %n\t%msg%n%n"
+
+app:
+  security:
+    jwt:
+      secret: "dev-secret-dev-secret-dev-secret-1234"
