@@ -98,7 +98,7 @@ jobs:
   docker:
     name: Docker Build & Push
     runs-on: ubuntu-latest
-    needs: [tests, build]
+    needs: [ tests, build ]
 
     steps:
       - name: Checkout code
@@ -119,18 +119,15 @@ jobs:
       - name: Build & Tag Docker Image
         run: |
           IMAGE_NAME="baris1892/private"
-          IMAGE_TAG="${{ needs.build.outputs.version }}" 
-          echo "IMAGE_NAME=$IMAGE_NAME"
-          echo "IMAGE_TAG=$IMAGE_TAG"
+          IMAGE_TAG="listing-service-${{ needs.build.outputs.version }}" 
           docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-          docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
+          docker tag ${IMAGE_NAME}:${IMAGE_TAG}
 
       - name: Push Docker Image
         run: |
           IMAGE_NAME="baris1892/private"
-          IMAGE_TAG="${{ needs.build.outputs.version }}"
+          IMAGE_TAG="listing-service-${{ needs.build.outputs.version }}"
           docker push ${IMAGE_NAME}:${IMAGE_TAG}
-          docker push ${IMAGE_NAME}:latest
 
   ##########################
   # Deploy Job (Dummy for local k3s)
@@ -138,7 +135,7 @@ jobs:
   deploy:
     name: Deploy to k3s (Dummy)
     runs-on: ubuntu-latest
-    needs: [docker, build]
+    needs: [ docker, build ]
     if: github.ref_name == 'main' || startsWith(github.ref_name, 'release/')
 
     steps:
