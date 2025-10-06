@@ -4,20 +4,28 @@ import dev.baristop.portfolio.listingservice.exception.InvalidListingStateExcept
 import dev.baristop.portfolio.listingservice.exception.ResourceNotFoundException;
 import dev.baristop.portfolio.listingservice.listing.dto.ListingCreateRequest;
 import dev.baristop.portfolio.listingservice.listing.dto.ListingDto;
+import dev.baristop.portfolio.listingservice.listing.dto.ListingQueryRequestDto;
 import dev.baristop.portfolio.listingservice.listing.dto.ListingUpdateRequest;
 import dev.baristop.portfolio.listingservice.listing.entity.Listing;
 import dev.baristop.portfolio.listingservice.listing.mapper.ListingMapper;
 import dev.baristop.portfolio.listingservice.listing.repository.ListingRepository;
+import dev.baristop.portfolio.listingservice.listing.specification.ListingSpecification;
 import dev.baristop.portfolio.listingservice.security.dto.UserPrincipal;
 import dev.baristop.portfolio.listingservice.security.entity.User;
 import dev.baristop.portfolio.listingservice.util.ValidationUtil;
 import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -27,6 +35,8 @@ public class ListingService {
     private final ListingRepository listingRepository;
     private final ValidationUtil validationUtil;
     private final ListingMapper listingMapper;
+
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("id", "title", "price");
 
     public Listing createListing(
         ListingCreateRequest listingCreateRequest,
@@ -105,5 +115,27 @@ public class ListingService {
         }
 
         return listingMapper.toDto(listing);
+    }
+
+    public Page<ListingDto> getAllListings(ListingQueryRequestDto request) {
+        if (!ALLOWED_SORT_FIELDS.contains(request.getSortBy())) {
+            throw new IllegalArgumentException(
+                "Invalid sortBy field: " + request.getSortBy()
+            );
+        }
+
+        // Build sorting
+        Sort sort = request.getSortDir().equalsIgnoreCase("asc")
+            ? Sort.by(request.getSortBy()).ascending()
+            : Sort.by(request.getSortBy()).descending();
+
+        Pageable pageable = PageRequest.of(request.calculateZeroBasedPage(), request.getSize(), sort);
+
+        // Build Specification using the unified DTO
+        Specification<Listing> spec = ListingSpecification.withFilters(request);
+
+        Page<Listing> listingPage = listingRepository.findAll(spec, pageable);
+
+        return listingPage.map(listingMapper::toDto);
     }
 }

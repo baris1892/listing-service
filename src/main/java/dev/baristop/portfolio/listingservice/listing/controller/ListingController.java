@@ -1,12 +1,10 @@
 package dev.baristop.portfolio.listingservice.listing.controller;
 
-import dev.baristop.portfolio.listingservice.listing.dto.ListingCreateRequest;
-import dev.baristop.portfolio.listingservice.listing.dto.ListingCreateResponse;
-import dev.baristop.portfolio.listingservice.listing.dto.ListingDto;
-import dev.baristop.portfolio.listingservice.listing.dto.ListingUpdateRequest;
+import dev.baristop.portfolio.listingservice.listing.dto.*;
 import dev.baristop.portfolio.listingservice.listing.entity.Listing;
 import dev.baristop.portfolio.listingservice.listing.service.ListingService;
 import dev.baristop.portfolio.listingservice.response.ErrorResponse;
+import dev.baristop.portfolio.listingservice.response.PaginatedResponse;
 import dev.baristop.portfolio.listingservice.response.SuccessResponse;
 import dev.baristop.portfolio.listingservice.response.ValidationErrorResponse;
 import dev.baristop.portfolio.listingservice.security.annotation.CurrentUser;
@@ -22,6 +20,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -121,7 +120,7 @@ public class ListingController {
         @ApiResponse(responseCode = "200", description = "Listing found"),
         @ApiResponse(
             responseCode = "404",
-            description = "Contact not found",
+            description = "Listing not found",
             content = @Content(
                 mediaType = "application/json",
                 schema = @Schema(implementation = ErrorResponse.class)
@@ -136,4 +135,19 @@ public class ListingController {
 
         return ResponseEntity.ok(dto);
     }
+
+    @GetMapping
+    @Operation(
+        summary = "Get all public listings",
+        description = "Returns paginated list of listings based on query parameters"
+    )
+    public PaginatedResponse<ListingDto> getAllListings(
+        @Parameter(description = "Query parameters for filtering listings")
+        @Valid ListingQueryRequestDto listingQueryRequestDto
+    ) {
+        Page<ListingDto> resultPage = listingService.getAllListings(listingQueryRequestDto);
+
+        return new PaginatedResponse<>(resultPage);
+    }
+
 }
