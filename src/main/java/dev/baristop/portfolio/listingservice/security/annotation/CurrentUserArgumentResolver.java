@@ -32,16 +32,10 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
                                   WebDataBinderFactory binderFactory) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || auth.getPrincipal() == null) {
+        if (auth == null || !(auth.getPrincipal() instanceof UserPrincipal principal)) {
             return null;
         }
 
-        Object principal = auth.getPrincipal();
-
-        if (principal instanceof UserPrincipal userPrincipal) {
-            return userService.getOrCreateUserByKeycloakId(userPrincipal.id());
-        } else {
-            throw new IllegalStateException("Unexpected principal type: " + principal.getClass());
-        }
+        return userService.getOrCreateUserByKeycloakId(principal.id());
     }
 }
