@@ -19,7 +19,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -324,7 +323,7 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
     public void getAllListing_shouldReturn200() throws Exception {
         User user = listingTestFactory.createUser("test-user1");
 
-        prepareDataForAllListings(user);
+        listingTestFactory.prepareDataForAllListings(user);
 
         mockMvc.perform(get("/api/v1/listings")
                 .param("page", "1")
@@ -333,7 +332,7 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
                 .param("sortBy", "title")
             )
             .andExpect(status().isOk())
-            .andDo(JsonTestUtils::printJson)
+            //.andDo(JsonTestUtils::printJson)
             .andExpect(jsonPath("$.data").isArray())
             .andExpect(jsonPath("$.data.length()").value(2))
             .andExpect(jsonPath("$.data[0].title").value("Galaxy S22"))
@@ -344,7 +343,7 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
     public void getAllListing_shouldReturn200_whenFilteredByTitle() throws Exception {
         User user = listingTestFactory.createUser("test-user1");
 
-        prepareDataForAllListings(user);
+        listingTestFactory.prepareDataForAllListings(user);
 
         mockMvc.perform(get("/api/v1/listings")
                 .param("page", "1")
@@ -354,7 +353,7 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
                 .param("title", "s22")
             )
             .andExpect(status().isOk())
-            .andDo(JsonTestUtils::printJson)
+            //.andDo(JsonTestUtils::printJson)
             .andExpect(jsonPath("$.data").isArray())
             .andExpect(jsonPath("$.data.length()").value(1))
             .andExpect(jsonPath("$.data[0].title").value("Galaxy S22"));
@@ -364,7 +363,7 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
     public void getAllListing_shouldReturn200_whenFilteredByPrice() throws Exception {
         User user = listingTestFactory.createUser("test-user1");
 
-        prepareDataForAllListings(user);
+        listingTestFactory.prepareDataForAllListings(user);
 
         mockMvc.perform(get("/api/v1/listings")
                 .param("page", "1")
@@ -384,7 +383,7 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
     public void getAllListing_shouldReturn200_whenFilteredByTitleAndPrice() throws Exception {
         User user = listingTestFactory.createUser("test-user1");
 
-        prepareDataForAllListings(user);
+        listingTestFactory.prepareDataForAllListings(user);
 
         mockMvc.perform(get("/api/v1/listings")
                 .param("page", "1")
@@ -399,16 +398,6 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
             .andExpect(jsonPath("$.data").isArray())
             .andExpect(jsonPath("$.data.length()").value(1))
             .andExpect(jsonPath("$.data[0].title").value("Galaxy S22"));
-    }
-
-    private void prepareDataForAllListings(User user) {
-        listingRepository.deleteAll();
-        listingRepository.saveAll(List.of(
-            new Listing("Google Pixel 8", "good condition", new BigDecimal("500"), "Saarlouis", ListingStatus.PENDING, user),
-            new Listing("iPhone 14", "like new", new BigDecimal("800"), "Augsburg", ListingStatus.PENDING, user),
-            new Listing("Galaxy S23", "used", new BigDecimal("400"), "Karlsruhe", ListingStatus.ACTIVE, user),
-            new Listing("Galaxy S22", "like new", new BigDecimal("550"), "Karlsruhe", ListingStatus.ACTIVE, user)
-        ));
     }
 
     private ResultMatcher[] listingMatches(Listing listing) {

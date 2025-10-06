@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 @Component
 public class ListingTestFactory {
@@ -83,5 +84,15 @@ public class ListingTestFactory {
 
     public User createDefaultUser() {
         return createUser("test-id");
+    }
+
+    public void prepareDataForAllListings(User user) {
+        listingRepository.deleteAll();
+        listingRepository.saveAll(List.of(
+            new Listing("Google Pixel 8", "good condition", new BigDecimal("500"), "Saarlouis", ListingStatus.PENDING, user),
+            new Listing("iPhone 14", "like new", new BigDecimal("800"), "Augsburg", ListingStatus.PENDING, user),
+            new Listing("Galaxy S23", "used", new BigDecimal("400"), "Karlsruhe", ListingStatus.ACTIVE, user),
+            new Listing("Galaxy S22", "like new", new BigDecimal("550"), "Karlsruhe", ListingStatus.ACTIVE, user)
+        ));
     }
 }
