@@ -34,17 +34,18 @@ jobs:
           cache: maven
 
       # Set Version for Maven & Docker
-      - name: Set project version
+      - name: Set Docker version
         id: set_version
+        shell: bash
         run: |
           if [[ "${GITHUB_REF}" == refs/tags/release/* ]]; then
             VERSION="${GITHUB_REF#refs/tags/release/}"
           else
-            BRANCH_NAME=$(echo "${GITHUB_REF#refs/heads/}")
-            VERSION="${BRANCH_NAME}-${GITHUB_SHA::7}"
+            BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+            VERSION="${BRANCH_NAME}-${GITHUB_SHA:0:7}"
           fi
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "Project version: $VERSION"
+          echo "Docker Image Tag: $VERSION"
 
       - name: Build JAR
         run: mvn clean package -Drevision=${{ env.VERSION }} -DskipTests -B
@@ -118,6 +119,8 @@ jobs:
         run: |
           IMAGE_NAME="baris1892/private"
           IMAGE_TAG="${{ env.VERSION }}"
+          echo IMAGE_NAME=$IMAGE_NAME
+          echo IMAGE_TAG=$IMAGE_TAG
           docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
           docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
 
