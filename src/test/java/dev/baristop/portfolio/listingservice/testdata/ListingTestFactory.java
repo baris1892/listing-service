@@ -23,7 +23,7 @@ public class ListingTestFactory {
 
     public Listing sampleListing(String title, User owner) {
         if (owner == null) {
-            owner = createDummyUser("dummy-keycloak-id");
+            owner = createUser("dummy-keycloak-id");
         }
 
         Listing listing = new Listing();
@@ -39,7 +39,7 @@ public class ListingTestFactory {
         return listingRepository.saveAndFlush(listing);
     }
 
-    public ListingCreateRequest defaultListingRequest() {
+    public ListingCreateRequest defaultListingCreateRequest() {
         ListingCreateRequest request = new ListingCreateRequest();
         request.setTitle("Test Title");
         request.setDescription("Test Description");
@@ -49,10 +49,28 @@ public class ListingTestFactory {
         return request;
     }
 
-    private User createDummyUser(String id) {
+    public Listing createDefaultListing() {
+        User owner = createDefaultUser();
+
+        Listing listing = new Listing();
+        listing.setTitle("Test Title");
+        listing.setDescription("Test Description");
+        listing.setCity("Test City");
+        listing.setPrice(BigDecimal.valueOf(100));
+        listing.setOwner(owner);
+        listing.setStatus(ListingStatus.PENDING);
+
+        return listingRepository.save(listing);
+    }
+
+    public User createUser(String id) {
         User user = new User();
         user.setKeycloakId(id);
 
         return userRepository.saveAndFlush(user);
+    }
+
+    public User createDefaultUser() {
+        return createUser("test-id");
     }
 }

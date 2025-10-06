@@ -95,4 +95,11 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.badRequest().body(error);
     }
+
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException ex) {
+        ErrorResponse error = ErrorResponse.of(ex.getStatus(), ex.getMessage());
+
+        return ResponseEntity.status(ex.getStatus()).body(error);
+    }
 }

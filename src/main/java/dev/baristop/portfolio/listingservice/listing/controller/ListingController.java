@@ -2,8 +2,10 @@ package dev.baristop.portfolio.listingservice.listing.controller;
 
 import dev.baristop.portfolio.listingservice.listing.dto.ListingCreateRequest;
 import dev.baristop.portfolio.listingservice.listing.dto.ListingCreateResponse;
+import dev.baristop.portfolio.listingservice.listing.dto.ListingUpdateRequest;
 import dev.baristop.portfolio.listingservice.listing.entity.Listing;
 import dev.baristop.portfolio.listingservice.listing.service.ListingService;
+import dev.baristop.portfolio.listingservice.response.SuccessResponse;
 import dev.baristop.portfolio.listingservice.response.ValidationErrorResponse;
 import dev.baristop.portfolio.listingservice.security.annotation.CurrentUser;
 import dev.baristop.portfolio.listingservice.security.entity.User;
@@ -20,10 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/listings")
@@ -51,9 +50,7 @@ public class ListingController {
         )
     })
     public ResponseEntity<ListingCreateResponse> createListing(
-        @Parameter(description = "Listing data to create", required = true)
-        @Valid @RequestBody ListingCreateRequest listingCreateRequest,
-
+        @Parameter(description = "Listing data to create", required = true) @Valid @RequestBody ListingCreateRequest listingCreateRequest,
         @CurrentUser User user
     ) {
         Listing listing = listingService.createListing(listingCreateRequest, user);
@@ -68,4 +65,24 @@ public class ListingController {
                 )
             );
     }
+
+    @PutMapping("/{id}")
+    @Secured({Role.USER})
+    @Operation(summary = "Update existing listing", description = "Updates an existing listing with the provided data")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Listing updated successfully"),
+        @ApiResponse(responseCode = "404", description = "Listing not found")
+    })
+    public ResponseEntity<SuccessResponse> updateListing(
+        @Parameter(description = "ID of the listing to update", required = true) @PathVariable Long id,
+        @Parameter(description = "Updated listing data", required = true) @RequestBody ListingUpdateRequest updateRequest,
+        @CurrentUser User user
+    ) {
+        listingService.updateListing(id, updateRequest, user);
+
+        return ResponseEntity.ok(
+            new SuccessResponse("Listing updated successfully", HttpStatus.OK.value())
+        );
+    }
+
 }

@@ -40,4 +40,12 @@ public class Listing {
     public void preUpdate() {
         updatedAt = Instant.now();
     }
+
+    public boolean isStatusPending() {
+        return this.getStatus().equals(ListingStatus.PENDING);
+    }
+
+    public boolean isOwner(User user) {
+        return this.getOwner().equals(user);
+    }
 }

@@ -1,11 +1,13 @@
 package dev.baristop.portfolio.listingservice.response;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
+@Setter
 @Getter
-@Builder
+@AllArgsConstructor
 public class SuccessResponse {
-    private final String message;
+    private String message;
     private final int status;
 }

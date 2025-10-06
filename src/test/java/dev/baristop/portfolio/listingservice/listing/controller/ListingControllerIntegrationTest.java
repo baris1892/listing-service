@@ -1,6 +1,7 @@
 package dev.baristop.portfolio.listingservice.listing.controller;
 
 import dev.baristop.portfolio.listingservice.listing.dto.ListingCreateRequest;
+import dev.baristop.portfolio.listingservice.listing.dto.ListingUpdateRequest;
 import dev.baristop.portfolio.listingservice.listing.entity.Listing;
 import dev.baristop.portfolio.listingservice.listing.entity.ListingStatus;
 import dev.baristop.portfolio.listingservice.listing.repository.ListingRepository;
@@ -19,6 +20,7 @@ import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -37,7 +39,7 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
     void createListing_shouldReturn401_whenUserIsAnonymous() throws Exception {
         mockMvc.perform(post("/api/v1/listings")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(JsonTestUtils.toJson(listingTestFactory.defaultListingRequest())))
+                .content(JsonTestUtils.toJson(listingTestFactory.defaultListingCreateRequest())))
             .andExpect(status().isUnauthorized());
     }
 
@@ -95,4 +97,121 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
         assertThat(listing.getPrice()).isEqualTo(price);
         assertThat(listing.getStatus()).isEqualTo(ListingStatus.PENDING);
     }
+
+    @Test
+    void update_listing_shouldReturn401_whenNotAuthenticated() throws Exception {
+        Listing listing = listingTestFactory.createDefaultListing();
+
+        ListingUpdateRequest updateRequest = new ListingUpdateRequest();
+        updateRequest.setTitle("Updated Title");
+        updateRequest.setDescription("Updated Description");
+        updateRequest.setCity("Updated City");
+        updateRequest.setPrice(BigDecimal.valueOf(123));
+
+        mockMvc.perform(put("/api/v1/listings/{id}", listing.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonTestUtils.toJson(updateRequest)))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockCustomUser(roles = {Role.USER})
+    void update_listing_shouldReturn200_whenOwnerAndPending() throws Exception {
+        Listing listing = listingTestFactory.createDefaultListing();
+
+        ListingUpdateRequest updateRequest = new ListingUpdateRequest();
+        updateRequest.setTitle("Updated Title");
+        updateRequest.setDescription("Updated Description");
+        updateRequest.setCity("Updated City");
+        updateRequest.setPrice(BigDecimal.valueOf(123));
+
+        mockMvc.perform(put("/api/v1/listings/{id}", listing.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonTestUtils.toJson(updateRequest)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.message").value("Listing updated successfully"));
+
+        Listing updated = listingRepository.findById(listing.getId()).orElseThrow();
+        assertThat(updated.getTitle()).isEqualTo("Updated Title");
+        assertThat(updated.getDescription()).isEqualTo("Updated Description");
+        assertThat(updated.getCity()).isEqualTo("Updated City");
+        assertThat(updated.getPrice()).isEqualByComparingTo(BigDecimal.valueOf(123));
+    }
+
+    @Test
+    @WithMockCustomUser(id = "not-owner", roles = {Role.USER})
+    void update_listing_shouldThrowAccessDenied_whenNotOwner() throws Exception {
+        Listing listing = listingTestFactory.createDefaultListing();
+
+        ListingUpdateRequest updateRequest = new ListingUpdateRequest();
+        updateRequest.setTitle("Updated Title");
+        updateRequest.setDescription("Updated Description");
+        updateRequest.setCity("Updated City");
+        updateRequest.setPrice(BigDecimal.valueOf(123));
+
+        mockMvc.perform(put("/api/v1/listings/{id}", listing.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonTestUtils.toJson(updateRequest)))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.message").value("You are not the owner of this listing"));
+    }
+
+    @Test
+    @WithMockCustomUser(roles = {Role.USER})
+    void update_listing_shouldThrowInvalidListingState_whenNotPending() throws Exception {
+        Listing listing = listingTestFactory.createDefaultListing();
+        listing.setStatus(ListingStatus.ACTIVE);
+        listingRepository.saveAndFlush(listing);
+
+        ListingUpdateRequest updateRequest = new ListingUpdateRequest();
+        updateRequest.setTitle("Updated Title");
+        updateRequest.setDescription("Updated Description");
+        updateRequest.setCity("Updated City");
+        updateRequest.setPrice(BigDecimal.valueOf(123));
+
+        mockMvc.perform(put("/api/v1/listings/{id}", listing.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonTestUtils.toJson(updateRequest)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("Only pending listings can be updated"));
+    }
+
+    @Test
+    @WithMockCustomUser(roles = {Role.USER})
+    void update_listing_shouldThrowResourceNotFound_whenListingDoesNotExist() throws Exception {
+        ListingUpdateRequest updateRequest = new ListingUpdateRequest();
+        updateRequest.setTitle("Updated Title");
+        updateRequest.setDescription("Updated Description");
+        updateRequest.setCity("Updated City");
+        updateRequest.setPrice(BigDecimal.valueOf(123));
+
+        mockMvc.perform(put("/api/v1/listings/{id}", 999)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonTestUtils.toJson(updateRequest)))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.message").value("Listing with ID 999 not found"));
+    }
+
+    @Test
+    @WithMockCustomUser(roles = {Role.USER})
+    void update_listing_shouldReturnValidationErrors() throws Exception {
+        Listing listing = listingTestFactory.createDefaultListing();
+
+        ListingUpdateRequest updateRequest = new ListingUpdateRequest();
+        updateRequest.setTitle("a"); // too short
+        updateRequest.setDescription(""); // empty
+        updateRequest.setCity("c"); // too short
+        updateRequest.setPrice(BigDecimal.valueOf(-1)); // invalid
+
+        mockMvc.perform(put("/api/v1/listings/{id}", listing.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonTestUtils.toJson(updateRequest)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("Validation failed"))
+            .andExpect(jsonPath("$.errors.title").exists())
+            .andExpect(jsonPath("$.errors.description").exists())
+            .andExpect(jsonPath("$.errors.city").exists())
+            .andExpect(jsonPath("$.errors.price").exists());
+    }
+
 }
