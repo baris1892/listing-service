@@ -9,7 +9,7 @@ on:
   workflow_dispatch:  # allows manual trigger from Actions tab
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,12 +25,16 @@ jobs:
           distribution: temurin
           cache: 'maven'  # enable Maven caching
 
-      # Run Maven build & tests (Testcontainers run automatically)
-      - name: Build & Test
-        run: mvn clean verify -Dspring.profiles.active=test
+      # Run Maven build
+      - name: Build
+        run: mvn clean package -DskipTests
+
+      # Run Maven tests (Testcontainers run automatically)
+      - name: Run Tests
+        run: mvn verify -Dspring.profiles.active=test
 
       # Upload test reports for inspection in Actions UI
-      - name: Upload test reports
+      - name: Upload Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
