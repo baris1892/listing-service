@@ -121,7 +121,6 @@ jobs:
           IMAGE_NAME="baris1892/private"
           IMAGE_TAG="listing-service-${{ needs.build.outputs.version }}" 
           docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-          docker tag ${IMAGE_NAME}:${IMAGE_TAG}
 
       - name: Push Docker Image
         run: |
