@@ -1,6 +1,5 @@
 package dev.baristop.portfolio.listingservice.security.dto;
 
-import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
@@ -16,10 +15,14 @@ import java.util.stream.Collectors;
  * The {@link #toString()} method is overridden to display authority names instead of full objects,
  * which is useful for logging and debugging.
  */
-public record UserPrincipal(String id, String email, Collection<? extends GrantedAuthority> authorities) {
+public record UserPrincipal(
+    String id,
+    String email,
+    Collection<? extends GrantedAuthority> authorities
+) {
 
     @Override
-    public @NotNull String toString() {
+    public String toString() {
         Set<String> authorityNames = authorities.stream()
             .map(GrantedAuthority::getAuthority)
             .collect(Collectors.toSet());

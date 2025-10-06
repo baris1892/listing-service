@@ -1,10 +1,26 @@
 package dev.baristop.portfolio.listingservice.listing.controller;
 
+import dev.baristop.portfolio.listingservice.listing.dto.ListingCreateRequest;
+import dev.baristop.portfolio.listingservice.listing.service.ListingService;
+import dev.baristop.portfolio.listingservice.response.SuccessResponse;
+import dev.baristop.portfolio.listingservice.response.ValidationErrorResponse;
+import dev.baristop.portfolio.listingservice.security.annotation.CurrentUser;
+import dev.baristop.portfolio.listingservice.security.entity.User;
 import dev.baristop.portfolio.listingservice.security.util.Role;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,21 +30,39 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 public class ListingController {
 
-    @GetMapping("/test-public")
-    public String testPublic() {
-        return "Test Public";
-    }
+    private final ListingService listingService;
 
-    @GetMapping("/test-user")
+    @PostMapping
     @Secured({Role.USER})
-    public String testUser() {
-        return "Test User";
-    }
+    @Operation(
+        summary = "Create a new listing",
+        description = "Creates a new listing with the provided data"
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Listing created successfully"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Validation errors",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ValidationErrorResponse.class)
+            )
+        )
+    })
+    public ResponseEntity<SuccessResponse> createListing(
+        @Parameter(description = "Listing data to create", required = true)
+        @Valid @RequestBody ListingCreateRequest listingCreateRequest,
 
-    @GetMapping("/test-admin")
-    @Secured({Role.ADMIN})
-    public String testAdmin() {
-        return "Test Admin";
-    }
+        @CurrentUser User user
+    ) {
+        listingService.createListing(listingCreateRequest, user);
 
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(SuccessResponse.builder()
+                .message("Listing created successfully")
+                .status(HttpStatus.CREATED.value())
+                .build()
+            );
+    }
 }

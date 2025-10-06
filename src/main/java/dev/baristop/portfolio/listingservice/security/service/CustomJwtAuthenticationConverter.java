@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.baristop.portfolio.listingservice.security.dto.UserPrincipal;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -37,12 +36,12 @@ import java.util.stream.Collectors;
 public class CustomJwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
     @Override
-    public AbstractAuthenticationToken convert(@NotNull Jwt jwt) {
+    public AbstractAuthenticationToken convert(Jwt jwt) {
         // logJwt(jwt);
 
         String email = Optional.ofNullable(jwt.getClaimAsString("email"))
             .orElseThrow(() -> new IllegalArgumentException("User JWT missing 'email' claim"));
-        String id = Optional.ofNullable(jwt.getClaimAsString("sub"))
+        String keycloakId = Optional.ofNullable(jwt.getClaimAsString("sub"))
             .orElseThrow(() -> new IllegalArgumentException("User JWT missing 'sub' claim"));
 
         // extract realm_access roles
@@ -58,7 +57,7 @@ public class CustomJwtAuthenticationConverter implements Converter<Jwt, Abstract
             .map(SimpleGrantedAuthority::new)
             .collect(Collectors.toList());
 
-        UserPrincipal principal = new UserPrincipal(id, email, authorities);
+        UserPrincipal principal = new UserPrincipal(keycloakId, email, authorities);
         return new UsernamePasswordAuthenticationToken(principal, jwt, authorities);
     }
 
