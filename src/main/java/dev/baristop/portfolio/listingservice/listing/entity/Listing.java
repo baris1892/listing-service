@@ -4,6 +4,7 @@ import dev.baristop.portfolio.listingservice.security.dto.UserPrincipal;
 import dev.baristop.portfolio.listingservice.security.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
@@ -13,6 +14,7 @@ import java.time.Instant;
 @Table(name = "listings")
 @Setter
 @Getter
+@NoArgsConstructor
 public class Listing {
 
     @Id
@@ -36,6 +38,15 @@ public class Listing {
 
     @Column(nullable = false)
     private Instant updatedAt = Instant.now();
+
+    public Listing(String title, String description, BigDecimal price, String city, ListingStatus status, User owner) {
+        this.title = title;
+        this.description = description;
+        this.price = price;
+        this.city = city;
+        this.status = status;
+        this.owner = owner;
+    }
 
     @PreUpdate
     public void preUpdate() {

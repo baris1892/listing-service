@@ -6,6 +6,7 @@ import dev.baristop.portfolio.listingservice.listing.entity.Listing;
 import dev.baristop.portfolio.listingservice.listing.entity.ListingStatus;
 import dev.baristop.portfolio.listingservice.listing.repository.ListingRepository;
 import dev.baristop.portfolio.listingservice.security.WithMockCustomUser;
+import dev.baristop.portfolio.listingservice.security.entity.User;
 import dev.baristop.portfolio.listingservice.security.util.Role;
 import dev.baristop.portfolio.listingservice.testdata.ListingTestFactory;
 import dev.baristop.portfolio.listingservice.utils.AbstractIntegrationTest;
@@ -18,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -289,6 +291,124 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
     void getListing_shouldReturn404_whenListingNotFound() throws Exception {
         mockMvc.perform(get("/api/v1/listings/{id}", 999))
             .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getAllListings_InvalidSortField() throws Exception {
+        mockMvc.perform(get("/api/v1/listings")
+                .param("page", "1")
+                .param("size", "10")
+                .param("sortDir", "desc")
+                .param("sortBy", "invalid-sort-by")
+            )
+            .andExpect(status().isBadRequest())
+            .andReturn();
+    }
+
+    @Test
+    void getAllListings_InvalidParams() throws Exception {
+        mockMvc.perform(get("/api/v1/listings").param("page", "0"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.errors.page").value("must be greater than or equal to 1"));
+
+        mockMvc.perform(get("/api/v1/listings").param("size", "0"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.errors.size").value("must be greater than or equal to 1"));
+
+        mockMvc.perform(get("/api/v1/listings").param("size", "101"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.errors.size").value("must be less than or equal to 100"));
+    }
+
+    @Test
+    public void getAllListing_shouldReturn200() throws Exception {
+        User user = listingTestFactory.createUser("test-user1");
+
+        prepareDataForAllListings(user);
+
+        mockMvc.perform(get("/api/v1/listings")
+                .param("page", "1")
+                .param("size", "10")
+                .param("sortDir", "asc")
+                .param("sortBy", "title")
+            )
+            .andExpect(status().isOk())
+            .andDo(JsonTestUtils::printJson)
+            .andExpect(jsonPath("$.data").isArray())
+            .andExpect(jsonPath("$.data.length()").value(2))
+            .andExpect(jsonPath("$.data[0].title").value("Galaxy S22"))
+            .andExpect(jsonPath("$.data[1].title").value("Galaxy S23"));
+    }
+
+    @Test
+    public void getAllListing_shouldReturn200_whenFilteredByTitle() throws Exception {
+        User user = listingTestFactory.createUser("test-user1");
+
+        prepareDataForAllListings(user);
+
+        mockMvc.perform(get("/api/v1/listings")
+                .param("page", "1")
+                .param("size", "10")
+                .param("sortDir", "asc")
+                .param("sortBy", "title")
+                .param("title", "s22")
+            )
+            .andExpect(status().isOk())
+            .andDo(JsonTestUtils::printJson)
+            .andExpect(jsonPath("$.data").isArray())
+            .andExpect(jsonPath("$.data.length()").value(1))
+            .andExpect(jsonPath("$.data[0].title").value("Galaxy S22"));
+    }
+
+    @Test
+    public void getAllListing_shouldReturn200_whenFilteredByPrice() throws Exception {
+        User user = listingTestFactory.createUser("test-user1");
+
+        prepareDataForAllListings(user);
+
+        mockMvc.perform(get("/api/v1/listings")
+                .param("page", "1")
+                .param("size", "10")
+                .param("sortDir", "asc")
+                .param("sortBy", "title")
+                .param("priceFrom", "550")
+                .param("priceTo", "550")
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data").isArray())
+            .andExpect(jsonPath("$.data.length()").value(1))
+            .andExpect(jsonPath("$.data[0].title").value("Galaxy S22"));
+    }
+
+    @Test
+    public void getAllListing_shouldReturn200_whenFilteredByTitleAndPrice() throws Exception {
+        User user = listingTestFactory.createUser("test-user1");
+
+        prepareDataForAllListings(user);
+
+        mockMvc.perform(get("/api/v1/listings")
+                .param("page", "1")
+                .param("size", "10")
+                .param("sortDir", "asc")
+                .param("sortBy", "title")
+                .param("title", "s22")
+                .param("priceFrom", "550")
+                .param("priceTo", "550")
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data").isArray())
+            .andExpect(jsonPath("$.data.length()").value(1))
+            .andExpect(jsonPath("$.data[0].title").value("Galaxy S22"));
+    }
+
+    private void prepareDataForAllListings(User user) {
+        listingRepository.deleteAll();
+        listingRepository.saveAll(List.of(
+            new Listing("Google Pixel 8", "good condition", new BigDecimal("500"), "Saarlouis", ListingStatus.PENDING, user),
+            new Listing("iPhone 14", "like new", new BigDecimal("800"), "Augsburg", ListingStatus.PENDING, user),
+            new Listing("Galaxy S23", "used", new BigDecimal("400"), "Karlsruhe", ListingStatus.ACTIVE, user),
+            new Listing("Galaxy S22", "like new", new BigDecimal("550"), "Karlsruhe", ListingStatus.ACTIVE, user)
+        ));
     }
 
     private ResultMatcher[] listingMatches(Listing listing) {
