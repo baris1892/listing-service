@@ -2,6 +2,7 @@ package dev.baristop.portfolio.listingservice.listing.dto;
 
 import dev.baristop.portfolio.listingservice.dto.PaginationRequestDto;
 import dev.baristop.portfolio.listingservice.listing.entity.ListingStatus;
+import dev.baristop.portfolio.listingservice.security.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.AccessLevel;
@@ -19,6 +20,10 @@ public class ListingQueryRequestDto extends PaginationRequestDto {
     @Schema(hidden = true)
     @Setter(AccessLevel.NONE) // prevent setting via query params (e.g. WebDataBinder)
     private ListingStatus status = ListingStatus.ACTIVE;
+
+    @Schema(hidden = true)
+    @Setter(AccessLevel.NONE) // prevent setting via query params (e.g. WebDataBinder)
+    private User user;
 
     @Schema(description = "Filter by title", example = "Google Pixel 8")
     private String title;
@@ -41,5 +46,9 @@ public class ListingQueryRequestDto extends PaginationRequestDto {
     // This method allows controlled internal updates (e.g. by service or controller).
     public void updateStatus(ListingStatus newStatus) {
         this.status = newStatus;
+    }
+
+    public void updateUser(User user) {
+        this.user = user;
     }
 }

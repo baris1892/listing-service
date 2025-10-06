@@ -77,6 +77,12 @@ public class ListingSpecification {
                 );
             }
 
+            if (requestDto.getUser() != null) {
+                predicates.add(
+                    cb.equal(root.get(Listing_.owner), requestDto.getUser())
+                );
+            }
+
             // avoid duplicates caused by joins
             Objects.requireNonNull(query, "query must not be null").distinct(true);
 
