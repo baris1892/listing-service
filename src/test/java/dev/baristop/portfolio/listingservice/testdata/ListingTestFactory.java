@@ -1,6 +1,7 @@
 package dev.baristop.portfolio.listingservice.testdata;
 
 import dev.baristop.portfolio.listingservice.listing.dto.ListingCreateRequest;
+import dev.baristop.portfolio.listingservice.listing.dto.ListingUpdateRequest;
 import dev.baristop.portfolio.listingservice.listing.entity.Listing;
 import dev.baristop.portfolio.listingservice.listing.entity.ListingStatus;
 import dev.baristop.portfolio.listingservice.listing.repository.ListingRepository;
@@ -47,6 +48,16 @@ public class ListingTestFactory {
         request.setPrice(BigDecimal.valueOf(100));
 
         return request;
+    }
+
+    public ListingUpdateRequest defaultListingUpdateRequest() {
+        ListingUpdateRequest updateRequest = new ListingUpdateRequest();
+        updateRequest.setTitle("Updated Title");
+        updateRequest.setDescription("Updated Description");
+        updateRequest.setCity("Updated City");
+        updateRequest.setPrice(BigDecimal.valueOf(123));
+
+        return updateRequest;
     }
 
     public Listing createDefaultListing() {

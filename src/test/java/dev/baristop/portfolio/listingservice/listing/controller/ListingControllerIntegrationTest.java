@@ -99,14 +99,10 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void update_listing_shouldReturn401_whenNotAuthenticated() throws Exception {
+    void updateListing_shouldReturn401_whenNotAuthenticated() throws Exception {
         Listing listing = listingTestFactory.createDefaultListing();
 
-        ListingUpdateRequest updateRequest = new ListingUpdateRequest();
-        updateRequest.setTitle("Updated Title");
-        updateRequest.setDescription("Updated Description");
-        updateRequest.setCity("Updated City");
-        updateRequest.setPrice(BigDecimal.valueOf(123));
+        ListingUpdateRequest updateRequest = listingTestFactory.defaultListingUpdateRequest();
 
         mockMvc.perform(put("/api/v1/listings/{id}", listing.getId())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -116,14 +112,10 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @WithMockCustomUser(roles = {Role.USER})
-    void update_listing_shouldReturn200_whenOwnerAndPending() throws Exception {
+    void updateListing_shouldReturn200_whenOwnerAndPending() throws Exception {
         Listing listing = listingTestFactory.createDefaultListing();
 
-        ListingUpdateRequest updateRequest = new ListingUpdateRequest();
-        updateRequest.setTitle("Updated Title");
-        updateRequest.setDescription("Updated Description");
-        updateRequest.setCity("Updated City");
-        updateRequest.setPrice(BigDecimal.valueOf(123));
+        ListingUpdateRequest updateRequest = listingTestFactory.defaultListingUpdateRequest();
 
         mockMvc.perform(put("/api/v1/listings/{id}", listing.getId())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -132,22 +124,18 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
             .andExpect(jsonPath("$.message").value("Listing updated successfully"));
 
         Listing updated = listingRepository.findById(listing.getId()).orElseThrow();
-        assertThat(updated.getTitle()).isEqualTo("Updated Title");
-        assertThat(updated.getDescription()).isEqualTo("Updated Description");
-        assertThat(updated.getCity()).isEqualTo("Updated City");
-        assertThat(updated.getPrice()).isEqualByComparingTo(BigDecimal.valueOf(123));
+        assertThat(updated.getTitle()).isEqualTo(updateRequest.getTitle());
+        assertThat(updated.getDescription()).isEqualTo(updateRequest.getDescription());
+        assertThat(updated.getCity()).isEqualTo(updateRequest.getCity());
+        assertThat(updated.getPrice()).isEqualByComparingTo(updateRequest.getPrice());
     }
 
     @Test
     @WithMockCustomUser(id = "not-owner", roles = {Role.USER})
-    void update_listing_shouldThrowAccessDenied_whenNotOwner() throws Exception {
+    void updateListing_shouldThrowAccessDenied_whenNotOwner() throws Exception {
         Listing listing = listingTestFactory.createDefaultListing();
 
-        ListingUpdateRequest updateRequest = new ListingUpdateRequest();
-        updateRequest.setTitle("Updated Title");
-        updateRequest.setDescription("Updated Description");
-        updateRequest.setCity("Updated City");
-        updateRequest.setPrice(BigDecimal.valueOf(123));
+        ListingUpdateRequest updateRequest = listingTestFactory.defaultListingUpdateRequest();
 
         mockMvc.perform(put("/api/v1/listings/{id}", listing.getId())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -158,16 +146,12 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @WithMockCustomUser(roles = {Role.USER})
-    void update_listing_shouldThrowInvalidListingState_whenNotPending() throws Exception {
+    void updateListing_shouldThrowInvalidListingState_whenNotPending() throws Exception {
         Listing listing = listingTestFactory.createDefaultListing();
         listing.setStatus(ListingStatus.ACTIVE);
         listingRepository.saveAndFlush(listing);
 
-        ListingUpdateRequest updateRequest = new ListingUpdateRequest();
-        updateRequest.setTitle("Updated Title");
-        updateRequest.setDescription("Updated Description");
-        updateRequest.setCity("Updated City");
-        updateRequest.setPrice(BigDecimal.valueOf(123));
+        ListingUpdateRequest updateRequest = listingTestFactory.defaultListingUpdateRequest();
 
         mockMvc.perform(put("/api/v1/listings/{id}", listing.getId())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -178,12 +162,8 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @WithMockCustomUser(roles = {Role.USER})
-    void update_listing_shouldThrowResourceNotFound_whenListingDoesNotExist() throws Exception {
-        ListingUpdateRequest updateRequest = new ListingUpdateRequest();
-        updateRequest.setTitle("Updated Title");
-        updateRequest.setDescription("Updated Description");
-        updateRequest.setCity("Updated City");
-        updateRequest.setPrice(BigDecimal.valueOf(123));
+    void updateListing_shouldThrowResourceNotFound_whenListingDoesNotExist() throws Exception {
+        ListingUpdateRequest updateRequest = listingTestFactory.defaultListingUpdateRequest();
 
         mockMvc.perform(put("/api/v1/listings/{id}", 999)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -194,7 +174,7 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @WithMockCustomUser(roles = {Role.USER})
-    void update_listing_shouldReturnValidationErrors() throws Exception {
+    void updateListing_shouldReturnValidationErrors() throws Exception {
         Listing listing = listingTestFactory.createDefaultListing();
 
         ListingUpdateRequest updateRequest = new ListingUpdateRequest();
