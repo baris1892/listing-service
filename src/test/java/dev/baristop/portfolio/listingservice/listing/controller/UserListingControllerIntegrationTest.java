@@ -5,7 +5,6 @@ import dev.baristop.portfolio.listingservice.security.entity.User;
 import dev.baristop.portfolio.listingservice.security.util.Role;
 import dev.baristop.portfolio.listingservice.testdata.ListingTestFactory;
 import dev.baristop.portfolio.listingservice.utils.AbstractIntegrationTest;
-import dev.baristop.portfolio.listingservice.utils.JsonTestUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,7 +35,7 @@ public class UserListingControllerIntegrationTest extends AbstractIntegrationTes
 
         mockMvc.perform(get("/api/v1/users/me/listings"))
             .andExpect(status().isOk())
-            .andDo(JsonTestUtils::printJson)
+            // .andDo(JsonTestUtils::printJson)
             .andExpect(jsonPath("$.data").isArray())
             .andExpect(jsonPath("$.data.length()").value(4))
             .andExpect(jsonPath("$.data[0].title").value("Google Pixel 8"))
