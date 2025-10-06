@@ -1,4 +1,17 @@
 services:
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: database
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+
   keycloak-web:
     image: keycloak/keycloak:26.3
     environment:
@@ -23,6 +36,7 @@ services:
     ports:
       - "8081:8080"
 
+
   keycloak-db:
     image: postgres:16
     volumes:
@@ -34,5 +48,7 @@ services:
     ports:
       - "5433:5432"
 
+
 volumes:
+  postgres_data:
   postgres_data_keycloak:

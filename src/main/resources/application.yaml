@@ -7,6 +7,24 @@ spring:
   application:
     name: listing-service
 
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+
+  jpa:
+    hibernate:
+      # TODO: change later to: ddl-auto: validate
+      ddl-auto: create
+    show-sql: false
+    properties:
+      hibernate:
+        show_sql: false
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
 management:
   endpoints:
     web:
@@ -30,3 +48,10 @@ server:
     include-exception: true
     whitelabel:
       enabled: false
+
+# for swagger docs
+springdoc:
+  paths-to-match: /api/v1/**
+  swagger-ui:
+    path: /docs
+
