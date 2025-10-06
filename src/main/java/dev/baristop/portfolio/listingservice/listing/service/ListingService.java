@@ -17,7 +17,7 @@ public class ListingService {
 
     private final ListingRepository listingRepository;
 
-    public void createListing(
+    public Listing createListing(
         ListingCreateRequest listingCreateRequest,
         User owner
     ) {
@@ -31,6 +31,8 @@ public class ListingService {
 
         listingRepository.save(listing);
         log.info("Created new listing with id={}", listing.getId());
+
+        return listing;
     }
 
 }

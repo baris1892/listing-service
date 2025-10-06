@@ -1,8 +1,9 @@
 package dev.baristop.portfolio.listingservice.listing.controller;
 
 import dev.baristop.portfolio.listingservice.listing.dto.ListingCreateRequest;
+import dev.baristop.portfolio.listingservice.listing.dto.ListingCreateResponse;
+import dev.baristop.portfolio.listingservice.listing.entity.Listing;
 import dev.baristop.portfolio.listingservice.listing.service.ListingService;
-import dev.baristop.portfolio.listingservice.response.SuccessResponse;
 import dev.baristop.portfolio.listingservice.response.ValidationErrorResponse;
 import dev.baristop.portfolio.listingservice.security.annotation.CurrentUser;
 import dev.baristop.portfolio.listingservice.security.entity.User;
@@ -49,20 +50,22 @@ public class ListingController {
             )
         )
     })
-    public ResponseEntity<SuccessResponse> createListing(
+    public ResponseEntity<ListingCreateResponse> createListing(
         @Parameter(description = "Listing data to create", required = true)
         @Valid @RequestBody ListingCreateRequest listingCreateRequest,
 
         @CurrentUser User user
     ) {
-        listingService.createListing(listingCreateRequest, user);
+        Listing listing = listingService.createListing(listingCreateRequest, user);
 
         return ResponseEntity
             .status(HttpStatus.CREATED)
-            .body(SuccessResponse.builder()
-                .message("Listing created successfully")
-                .status(HttpStatus.CREATED.value())
-                .build()
+            .body(
+                new ListingCreateResponse(
+                    "Listing created successfully",
+                    HttpStatus.CREATED.value(),
+                    listing.getId()
+                )
             );
     }
 }
