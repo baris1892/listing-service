@@ -7,11 +7,11 @@ on:
       - main
       - develop
     tags:
-      - 'release/*'       # release trigger
+      - 'release/*'
   pull_request:
     branches:
       - main
-  workflow_dispatch:       # manual trigger
+  workflow_dispatch:
 
 jobs:
 
@@ -33,13 +33,15 @@ jobs:
           distribution: temurin
           cache: maven
 
+      # Set Version for Maven & Docker
       - name: Set project version
         id: set_version
         run: |
-          if [[ "${GITHUB_REF_NAME}" == release/* ]]; then
-            VERSION=${GITHUB_REF_NAME#release/}
+          if [[ "${GITHUB_REF}" == refs/tags/release/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/release/}"
           else
-            VERSION="snapshot-${GITHUB_SHA::7}"
+            BRANCH_NAME=$(echo "${GITHUB_REF#refs/heads/}")
+            VERSION="${BRANCH_NAME}-${GITHUB_SHA::7}"
           fi
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "Project version: $VERSION"
@@ -54,7 +56,7 @@ jobs:
           path: target/*.jar
 
   ##########################
-  # Run Tests
+  # Tests Job
   ##########################
   tests:
     name: Tests
@@ -78,9 +80,8 @@ jobs:
           name: listing-service-jar
           path: target/
 
-      # Run Maven tests (Testcontainers run automatically)
-      - name: Run Tests
-        run: mvn verify -Dspring.profiles.active=test
+      - name: Run Maven Tests
+        run: mvn verify -Dspring.profiles.active=test -B
 
       - name: Upload test reports
         if: always()
@@ -95,7 +96,7 @@ jobs:
   docker:
     name: Docker Build & Push
     runs-on: ubuntu-latest
-    needs: [ build, tests ]
+    needs: tests
 
     steps:
       - name: Checkout code
@@ -113,15 +114,19 @@ jobs:
           name: listing-service-jar
           path: target/
 
-      - name: Build Docker Image
+      - name: Build & Tag Docker Image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/listing-service:${{ env.VERSION }} .
-          docker tag ${{ secrets.DOCKERHUB_USERNAME }}/listing-service:${{ env.VERSION }} ${{ secrets.DOCKERHUB_USERNAME }}/listing-service:latest
+          IMAGE_NAME="baris1892/private"
+          IMAGE_TAG="${{ env.VERSION }}"
+          docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+          docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
 
       - name: Push Docker Image
         run: |
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/listing-service:${{ env.VERSION }}
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/listing-service:latest
+          IMAGE_NAME="baris1892/private"
+          IMAGE_TAG="${{ env.VERSION }}"
+          docker push ${IMAGE_NAME}:${IMAGE_TAG}
+          docker push ${IMAGE_NAME}:latest
 
   ##########################
   # Deploy Job (Dummy for local k3s)
@@ -135,5 +140,5 @@ jobs:
     steps:
       - name: Dummy Deploy
         run: |
-          echo "kubectl apply -f k8s/deployment.yaml with image: ${{ secrets.DOCKERHUB_USERNAME }}/listing-service:${{ env.VERSION }}"
+          echo "kubectl apply -f k8s/deployment.yaml with image: baris1892/private:${{ env.VERSION }}"
           echo "Skipping actual deployment (local cluster)"

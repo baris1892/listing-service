@@ -40,6 +40,7 @@ management:
 info:
   app:
     name: listing-service
+    version: "@project.version@"
 
 server:
   error:
