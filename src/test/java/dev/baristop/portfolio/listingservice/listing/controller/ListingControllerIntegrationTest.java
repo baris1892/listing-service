@@ -19,8 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -194,4 +193,55 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
             .andExpect(jsonPath("$.errors.price").exists());
     }
 
+    @Test
+    void deleteListing_shouldReturn401_whenNotAuthenticated() throws Exception {
+        Listing listing = listingTestFactory.createDefaultListing();
+
+        mockMvc.perform(delete("/api/v1/listings/{id}", listing.getId()))
+            .andExpect(status().isUnauthorized());
+
+        assertThat(listingRepository.findById(listing.getId()))
+            .isPresent();
+    }
+
+    @Test
+    @WithMockCustomUser(id = "not-owner", roles = {Role.USER})
+    void deleteListing_shouldThrowAccessDenied_whenNotOwner() throws Exception {
+        Listing listing = listingTestFactory.createDefaultListing();
+
+        mockMvc.perform(delete("/api/v1/listings/{id}", listing.getId()))
+            .andExpect(status().isForbidden());
+
+        assertThat(listingRepository.findById(listing.getId()))
+            .isPresent();
+    }
+
+    @Test
+    @WithMockCustomUser(id = "not-owner", roles = {Role.ADMIN})
+    void deleteListing_shouldReturn200_whenAdmin() throws Exception {
+        Listing listing = listingTestFactory.createDefaultListing();
+        assertThat(listingRepository.findById(listing.getId()))
+            .isPresent();
+
+        // users with "ROLE_ADMIN" can also delete listings
+        mockMvc.perform(delete("/api/v1/listings/{id}", listing.getId()))
+            .andExpect(status().isOk());
+
+        assertThat(listingRepository.findById(listing.getId()))
+            .isEmpty();
+    }
+
+    @Test
+    @WithMockCustomUser(roles = {Role.USER})
+    void deleteListing_shouldReturn200_whenOwner() throws Exception {
+        Listing listing = listingTestFactory.createDefaultListing();
+        assertThat(listingRepository.findById(listing.getId()))
+            .isPresent();
+
+        mockMvc.perform(delete("/api/v1/listings/{id}", listing.getId()))
+            .andExpect(status().isOk());
+
+        assertThat(listingRepository.findById(listing.getId()))
+            .isEmpty();
+    }
 }

@@ -8,6 +8,7 @@ import dev.baristop.portfolio.listingservice.listing.service.ListingService;
 import dev.baristop.portfolio.listingservice.response.SuccessResponse;
 import dev.baristop.portfolio.listingservice.response.ValidationErrorResponse;
 import dev.baristop.portfolio.listingservice.security.annotation.CurrentUser;
+import dev.baristop.portfolio.listingservice.security.dto.UserPrincipal;
 import dev.baristop.portfolio.listingservice.security.entity.User;
 import dev.baristop.portfolio.listingservice.security.util.Role;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -85,4 +87,26 @@ public class ListingController {
         );
     }
 
+    @DeleteMapping("/{id}")
+    @Secured({Role.USER})
+    @Operation(
+        summary = "Delete a listing",
+        description = "Deletes the listing. Only own listings can be deleted",
+        security = {@SecurityRequirement(name = "bearerAuth")}
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Listing deleted successfully"),
+        @ApiResponse(responseCode = "403", description = "Access denied"),
+        @ApiResponse(responseCode = "404", description = "Listing not found")
+    })
+    public ResponseEntity<SuccessResponse> deleteListing(
+        @Parameter(description = "ID of the listing to delete", required = true) @PathVariable Long id,
+        @CurrentUser UserPrincipal userPrincipal
+    ) {
+        listingService.deleteListing(id, userPrincipal);
+
+        return ResponseEntity.ok(
+            new SuccessResponse("Listing deleted successfully", HttpStatus.OK.value())
+        );
+    }
 }

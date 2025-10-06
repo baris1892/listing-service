@@ -6,6 +6,7 @@ import dev.baristop.portfolio.listingservice.listing.dto.ListingCreateRequest;
 import dev.baristop.portfolio.listingservice.listing.dto.ListingUpdateRequest;
 import dev.baristop.portfolio.listingservice.listing.entity.Listing;
 import dev.baristop.portfolio.listingservice.listing.repository.ListingRepository;
+import dev.baristop.portfolio.listingservice.security.dto.UserPrincipal;
 import dev.baristop.portfolio.listingservice.security.entity.User;
 import dev.baristop.portfolio.listingservice.util.ValidationUtil;
 import lombok.AllArgsConstructor;
@@ -62,5 +63,18 @@ public class ListingService {
         existingListing.setCity(updateRequest.getCity());
 
         listingRepository.save(existingListing);
+    }
+
+    public void deleteListing(Long id, UserPrincipal userPrincipal) {
+        Listing existingListing = listingRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Listing with ID " + id + " not found"));
+
+        boolean isOwner = existingListing.isOwner(userPrincipal);
+        boolean isAdmin = userPrincipal.isAdmin();
+        if (!isOwner && !isAdmin) {
+            throw new AccessDeniedException("You are not the owner of this listing");
+        }
+
+        listingRepository.delete(existingListing);
     }
 }

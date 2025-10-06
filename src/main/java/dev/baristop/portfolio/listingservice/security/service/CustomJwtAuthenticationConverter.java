@@ -58,6 +58,7 @@ public class CustomJwtAuthenticationConverter implements Converter<Jwt, Abstract
             .collect(Collectors.toList());
 
         UserPrincipal principal = new UserPrincipal(keycloakId, email, authorities);
+
         return new UsernamePasswordAuthenticationToken(principal, jwt, authorities);
     }
 

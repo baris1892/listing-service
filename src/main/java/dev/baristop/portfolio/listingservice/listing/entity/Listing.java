@@ -1,5 +1,6 @@
 package dev.baristop.portfolio.listingservice.listing.entity;
 
+import dev.baristop.portfolio.listingservice.security.dto.UserPrincipal;
 import dev.baristop.portfolio.listingservice.security.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -47,5 +48,9 @@ public class Listing {
 
     public boolean isOwner(User user) {
         return this.getOwner().equals(user);
+    }
+
+    public boolean isOwner(UserPrincipal user) {
+        return this.getOwner().getKeycloakId().equals(user.id());
     }
 }

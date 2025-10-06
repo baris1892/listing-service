@@ -22,7 +22,8 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.getParameterAnnotation(CurrentUser.class) != null
-            && parameter.getParameterType().equals(User.class);
+            && (parameter.getParameterType().equals(User.class)
+            || parameter.getParameterType().equals(UserPrincipal.class));
     }
 
     @Override
@@ -36,6 +37,12 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
             return null;
         }
 
-        return userService.getOrCreateUserByKeycloakId(principal.id());
+        if (parameter.getParameterType().equals(User.class)) {
+            return userService.getOrCreateUserByKeycloakId(principal.id());
+        } else if (parameter.getParameterType().equals(UserPrincipal.class)) {
+            return principal;
+        }
+
+        return null;
     }
 }

@@ -1,5 +1,6 @@
 package dev.baristop.portfolio.listingservice.security.dto;
 
+import dev.baristop.portfolio.listingservice.security.util.Role;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
@@ -32,5 +33,10 @@ public record UserPrincipal(
             ", email='" + email + '\'' +
             ", authorities=" + authorityNames +
             '}';
+    }
+
+    public boolean isAdmin() {
+        return this.authorities.stream()
+            .anyMatch(a -> a.getAuthority().equals(Role.ADMIN));
     }
 }
