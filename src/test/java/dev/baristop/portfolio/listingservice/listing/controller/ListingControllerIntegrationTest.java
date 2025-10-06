@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
 
 import java.math.BigDecimal;
 
@@ -243,5 +244,62 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
 
         assertThat(listingRepository.findById(listing.getId()))
             .isEmpty();
+    }
+
+    @Test
+    void getListing_shouldReturn200_whenListingStatusNotPending() throws Exception {
+        Listing listing = listingTestFactory.createDefaultListing();
+        listing.setStatus(ListingStatus.ACTIVE);
+        listingRepository.saveAndFlush(listing);
+
+        mockMvc.perform(get("/api/v1/listings/{id}", listing.getId()))
+            .andExpect(status().isOk())
+            .andExpectAll(listingMatches(listing));
+    }
+
+    @Test
+    @WithMockCustomUser(roles = {Role.USER})
+    void getListing_shouldReturn200_whenOwner() throws Exception {
+        Listing listing = listingTestFactory.createDefaultListing();
+
+        mockMvc.perform(get("/api/v1/listings/{id}", listing.getId()))
+            .andExpect(status().isOk())
+            .andExpectAll(listingMatches(listing));
+    }
+
+    @Test
+    @WithMockCustomUser(roles = {Role.ADMIN})
+    void getListing_shouldReturn200_whenAdmin() throws Exception {
+        Listing listing = listingTestFactory.createDefaultListing();
+
+        mockMvc.perform(get("/api/v1/listings/{id}", listing.getId()))
+            .andExpect(status().isOk())
+            .andExpectAll(listingMatches(listing));
+    }
+
+    @Test
+    void getListing_shouldReturn404_whenListingStatusPendingAndNotOwner() throws Exception {
+        Listing listing = listingTestFactory.createDefaultListing();
+
+        mockMvc.perform(get("/api/v1/listings/{id}", listing.getId()))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getListing_shouldReturn404_whenListingNotFound() throws Exception {
+        mockMvc.perform(get("/api/v1/listings/{id}", 999))
+            .andExpect(status().isNotFound());
+    }
+
+    private ResultMatcher[] listingMatches(Listing listing) {
+        return new ResultMatcher[]{
+            jsonPath("$.id").value(listing.getId()),
+            jsonPath("$.title").value(listing.getTitle()),
+            jsonPath("$.description").value(listing.getDescription()),
+            jsonPath("$.city").value(listing.getCity()),
+            jsonPath("$.price").value(listing.getPrice()),
+            jsonPath("$.status").value(listing.getStatus().toString()),
+            jsonPath("$.createdAt").exists()
+        };
     }
 }

@@ -2,9 +2,11 @@ package dev.baristop.portfolio.listingservice.listing.controller;
 
 import dev.baristop.portfolio.listingservice.listing.dto.ListingCreateRequest;
 import dev.baristop.portfolio.listingservice.listing.dto.ListingCreateResponse;
+import dev.baristop.portfolio.listingservice.listing.dto.ListingDto;
 import dev.baristop.portfolio.listingservice.listing.dto.ListingUpdateRequest;
 import dev.baristop.portfolio.listingservice.listing.entity.Listing;
 import dev.baristop.portfolio.listingservice.listing.service.ListingService;
+import dev.baristop.portfolio.listingservice.response.ErrorResponse;
 import dev.baristop.portfolio.listingservice.response.SuccessResponse;
 import dev.baristop.portfolio.listingservice.response.ValidationErrorResponse;
 import dev.baristop.portfolio.listingservice.security.annotation.CurrentUser;
@@ -108,5 +110,30 @@ public class ListingController {
         return ResponseEntity.ok(
             new SuccessResponse("Listing deleted successfully", HttpStatus.OK.value())
         );
+    }
+
+    @GetMapping("/{id}")
+    @Operation(
+        summary = "Get listing by ID",
+        description = "Returns the listing identified by the given ID."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Listing found"),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Contact not found",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ErrorResponse.class)
+            )
+        )
+    })
+    public ResponseEntity<ListingDto> getListing(
+        @Parameter(description = "ID of the listing to retrieve", required = true) @PathVariable Long id,
+        @CurrentUser UserPrincipal currentUser
+    ) {
+        ListingDto dto = listingService.getListingById(id, currentUser);
+
+        return ResponseEntity.ok(dto);
     }
 }

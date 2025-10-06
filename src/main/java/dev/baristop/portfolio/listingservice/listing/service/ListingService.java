@@ -3,12 +3,15 @@ package dev.baristop.portfolio.listingservice.listing.service;
 import dev.baristop.portfolio.listingservice.exception.InvalidListingStateException;
 import dev.baristop.portfolio.listingservice.exception.ResourceNotFoundException;
 import dev.baristop.portfolio.listingservice.listing.dto.ListingCreateRequest;
+import dev.baristop.portfolio.listingservice.listing.dto.ListingDto;
 import dev.baristop.portfolio.listingservice.listing.dto.ListingUpdateRequest;
 import dev.baristop.portfolio.listingservice.listing.entity.Listing;
+import dev.baristop.portfolio.listingservice.listing.mapper.ListingMapper;
 import dev.baristop.portfolio.listingservice.listing.repository.ListingRepository;
 import dev.baristop.portfolio.listingservice.security.dto.UserPrincipal;
 import dev.baristop.portfolio.listingservice.security.entity.User;
 import dev.baristop.portfolio.listingservice.util.ValidationUtil;
+import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
@@ -22,8 +25,8 @@ import java.time.Instant;
 public class ListingService {
 
     private final ListingRepository listingRepository;
-
     private final ValidationUtil validationUtil;
+    private final ListingMapper listingMapper;
 
     public Listing createListing(
         ListingCreateRequest listingCreateRequest,
@@ -76,5 +79,31 @@ public class ListingService {
         }
 
         listingRepository.delete(existingListing);
+    }
+
+    /**
+     * Returns the listing identified by the given ID.
+     * <p>
+     * Only non-PENDING listings are visible to the public.
+     * Owners and admins can view all listings, including PENDING ones.
+     *
+     * @param id            the ID of the listing to retrieve
+     * @param userPrincipal the currently authenticated user, or null if unauthenticated
+     *
+     * @return the listing DTO
+     *
+     * @throws ResourceNotFoundException if the listing does not exist or is pending and the user is not authorized
+     */
+    public ListingDto getListingById(Long id, @Nullable UserPrincipal userPrincipal) {
+        Listing listing = listingRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Listing with ID " + id + " not found"));
+
+        boolean isOwner = userPrincipal != null && listing.isOwner(userPrincipal);
+        boolean isAdmin = userPrincipal != null && userPrincipal.isAdmin();
+        if (listing.isStatusPending() && !isOwner && !isAdmin) {
+            throw new ResourceNotFoundException("Listing with ID " + id + " not found");
+        }
+
+        return listingMapper.toDto(listing);
     }
 }
