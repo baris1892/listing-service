@@ -2,6 +2,7 @@ package dev.baristop.portfolio.listingservice.listing.controller;
 
 import dev.baristop.portfolio.listingservice.listing.dto.*;
 import dev.baristop.portfolio.listingservice.listing.entity.Listing;
+import dev.baristop.portfolio.listingservice.listing.entity.ListingStatus;
 import dev.baristop.portfolio.listingservice.listing.service.ListingService;
 import dev.baristop.portfolio.listingservice.response.ErrorResponse;
 import dev.baristop.portfolio.listingservice.response.PaginatedResponse;
@@ -145,6 +146,8 @@ public class ListingController {
         @Parameter(description = "Query parameters for filtering listings")
         @Valid ListingQueryRequestDto listingQueryRequestDto
     ) {
+        // always set ListingStatus.ACTIVE, regardless of what query param "status" was set to
+        listingQueryRequestDto.setStatus(ListingStatus.ACTIVE);
         Page<ListingDto> resultPage = listingService.getAllListings(listingQueryRequestDto);
 
         return new PaginatedResponse<>(resultPage);

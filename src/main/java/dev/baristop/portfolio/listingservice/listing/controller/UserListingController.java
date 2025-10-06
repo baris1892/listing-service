@@ -36,8 +36,6 @@ public class UserListingController {
         @Parameter(description = "Query parameters for filtering listings") @Valid ListingQueryRequestDto listingQueryRequestDto,
         @CurrentUser User user
     ) {
-        // reset status since user should be able to see all of his own listings regardless of listing status
-        listingQueryRequestDto.updateStatus(null);
         listingQueryRequestDto.updateUser(user);
 
         Page<ListingDto> resultPage = listingService.getAllListings(listingQueryRequestDto);

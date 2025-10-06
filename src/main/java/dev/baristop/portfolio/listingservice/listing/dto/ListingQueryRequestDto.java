@@ -17,9 +17,8 @@ import java.math.BigDecimal;
 @ToString
 public class ListingQueryRequestDto extends PaginationRequestDto {
 
-    @Schema(hidden = true)
-    @Setter(AccessLevel.NONE) // prevent setting via query params (e.g. WebDataBinder)
-    private ListingStatus status = ListingStatus.ACTIVE;
+    @Schema(description = "Filter by status")
+    private ListingStatus status;
 
     @Schema(hidden = true)
     @Setter(AccessLevel.NONE) // prevent setting via query params (e.g. WebDataBinder)
@@ -42,12 +41,8 @@ public class ListingQueryRequestDto extends PaginationRequestDto {
     @DecimalMin(value = "0.0", message = "priceTo must be positive")
     private BigDecimal priceTo;
 
-    // No public setter for status to avoid external manipulation.
+    // No public setter to avoid external manipulation.
     // This method allows controlled internal updates (e.g. by service or controller).
-    public void updateStatus(ListingStatus newStatus) {
-        this.status = newStatus;
-    }
-
     public void updateUser(User user) {
         this.user = user;
     }
