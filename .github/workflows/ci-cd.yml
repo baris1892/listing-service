@@ -99,6 +99,10 @@ jobs:
     name: Docker Build & Push
     runs-on: ubuntu-latest
     needs: [ tests, build ]
+    if: github.ref_name == 'main' || startsWith(github.ref_name, 'release/')
+    env:
+      IMAGE_REPO: baris1892/private
+      IMAGE_TAG_FULL: listing-service-${{ needs.build.outputs.version }}
 
     steps:
       - name: Checkout code
@@ -118,15 +122,12 @@ jobs:
 
       - name: Build & Tag Docker Image
         run: |
-          IMAGE_NAME="baris1892/private"
-          IMAGE_TAG="listing-service-${{ needs.build.outputs.version }}" 
-          docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+          echo "Building image ${{ env.IMAGE_REPO }}:${{ env.IMAGE_TAG_FULL }}"
+          docker build -t ${{ env.IMAGE_REPO }}:${{ env.IMAGE_TAG_FULL }} .
 
       - name: Push Docker Image
         run: |
-          IMAGE_NAME="baris1892/private"
-          IMAGE_TAG="listing-service-${{ needs.build.outputs.version }}"
-          docker push ${IMAGE_NAME}:${IMAGE_TAG}
+          docker push ${{ env.IMAGE_REPO }}:${{ env.IMAGE_TAG_FULL }}
 
   ##########################
   # Deploy Job (Dummy for local k3s)
@@ -140,5 +141,5 @@ jobs:
     steps:
       - name: Dummy Deploy
         run: |
-          echo "kubectl apply -f k8s/deployment.yaml with image: baris1892/private:${{ needs.build.outputs.version }}"
+          echo "kubectl apply -f k8s/deployment.yaml with image: baris1892/private:listing-service-${{ needs.build.outputs.version }}"
           echo "Skipping actual deployment (local cluster)"
