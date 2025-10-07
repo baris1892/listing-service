@@ -9,6 +9,7 @@ import dev.baristop.portfolio.listingservice.listing.dto.ListingUpdateRequest;
 import dev.baristop.portfolio.listingservice.listing.entity.Listing;
 import dev.baristop.portfolio.listingservice.listing.mapper.ListingMapper;
 import dev.baristop.portfolio.listingservice.listing.repository.ListingRepository;
+import dev.baristop.portfolio.listingservice.listing.repository.UserFavoriteListingRepository;
 import dev.baristop.portfolio.listingservice.listing.specification.ListingSpecification;
 import dev.baristop.portfolio.listingservice.security.dto.UserPrincipal;
 import dev.baristop.portfolio.listingservice.security.entity.User;
@@ -33,6 +34,7 @@ import java.util.Set;
 public class ListingService {
 
     private final ListingRepository listingRepository;
+    private final UserFavoriteListingRepository favoriteRepository;
     private final ValidationUtil validationUtil;
     private final ListingMapper listingMapper;
 
@@ -117,7 +119,10 @@ public class ListingService {
         return listingMapper.toDto(listing);
     }
 
-    public Page<ListingDto> getAllListings(ListingQueryRequestDto request) {
+    public Page<ListingDto> getAllListings(
+        ListingQueryRequestDto request,
+        @Nullable User currentUser
+    ) {
         if (!ALLOWED_SORT_FIELDS.contains(request.getSortBy())) {
             throw new IllegalArgumentException(
                 "Invalid sortBy field: " + request.getSortBy()
@@ -136,6 +141,20 @@ public class ListingService {
 
         Page<Listing> listingPage = listingRepository.findAll(spec, pageable);
 
-        return listingPage.map(listingMapper::toDto);
+        // add "favorite" flag for favorized listings of currentUser
+        Set<Long> favoriteListingIds = currentUser != null
+            ? favoriteRepository.findFavoriteListingIdsByUserId(currentUser.getId())
+            : Set.of();
+
+        return listingPage.map(listing -> {
+            ListingDto dto = listingMapper.toDto(listing);
+
+            dto.setIsFavorite(currentUser != null
+                ? favoriteListingIds.contains(listing.getId())
+                : null
+            );
+
+            return dto;
+        });
     }
 }

@@ -38,7 +38,7 @@ public class UserListingController {
     ) {
         listingQueryRequestDto.updateUser(user);
 
-        Page<ListingDto> resultPage = listingService.getAllListings(listingQueryRequestDto);
+        Page<ListingDto> resultPage = listingService.getAllListings(listingQueryRequestDto, user);
 
         return new PaginatedResponse<>(resultPage);
     }

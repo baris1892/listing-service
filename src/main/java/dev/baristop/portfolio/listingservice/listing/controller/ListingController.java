@@ -146,11 +146,12 @@ public class ListingController {
     )
     public PaginatedResponse<ListingDto> getAllListings(
         @Parameter(description = "Query parameters for filtering listings")
-        @Valid ListingQueryRequestDto listingQueryRequestDto
+        @Valid ListingQueryRequestDto listingQueryRequestDto,
+        @CurrentUser User user
     ) {
         // always set ListingStatus.ACTIVE, regardless of what query param "status" was set to
         listingQueryRequestDto.setStatus(ListingStatus.ACTIVE);
-        Page<ListingDto> resultPage = listingService.getAllListings(listingQueryRequestDto);
+        Page<ListingDto> resultPage = listingService.getAllListings(listingQueryRequestDto, user);
 
         return new PaginatedResponse<>(resultPage);
     }

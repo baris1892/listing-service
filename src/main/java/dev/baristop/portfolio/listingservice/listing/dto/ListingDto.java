@@ -1,5 +1,6 @@
 package dev.baristop.portfolio.listingservice.listing.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import dev.baristop.portfolio.listingservice.listing.entity.ListingStatus;
 import lombok.*;
 
@@ -19,4 +20,7 @@ public class ListingDto {
     private String city;
     private ListingStatus status;
     private Instant createdAt;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Boolean isFavorite;
 }

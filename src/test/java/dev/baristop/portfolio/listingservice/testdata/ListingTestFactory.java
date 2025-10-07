@@ -86,13 +86,15 @@ public class ListingTestFactory {
         return createUser("test-id");
     }
 
-    public void prepareDataForAllListings(User user) {
+    public List<Listing> prepareDataForAllListings(User user) {
         listingRepository.deleteAll();
-        listingRepository.saveAll(List.of(
+        List<Listing> listings = List.of(
             new Listing("Google Pixel 8", "good condition", new BigDecimal("500"), "Saarlouis", ListingStatus.PENDING, user),
             new Listing("iPhone 14", "like new", new BigDecimal("800"), "Augsburg", ListingStatus.PENDING, user),
             new Listing("Galaxy S23", "used", new BigDecimal("400"), "Karlsruhe", ListingStatus.ACTIVE, user),
             new Listing("Galaxy S22", "like new", new BigDecimal("550"), "Karlsruhe", ListingStatus.ACTIVE, user)
-        ));
+        );
+
+        return listingRepository.saveAll(listings);
     }
 }

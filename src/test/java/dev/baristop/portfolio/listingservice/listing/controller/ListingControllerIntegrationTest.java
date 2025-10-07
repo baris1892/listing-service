@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -404,7 +405,42 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data").isArray())
             .andExpect(jsonPath("$.data.length()").value(1))
-            .andExpect(jsonPath("$.data[0].title").value("Galaxy S22"));
+            .andExpect(jsonPath("$.data[0].title").value("Galaxy S22"))
+            .andExpect(jsonPath("$.data[0].isFavorite").doesNotExist());
+    }
+
+    @Test
+    @WithMockCustomUser(id = "user1", roles = {Role.USER})
+    public void getAllListing_shouldReturn200WithFavoriteFlag() throws Exception {
+        // Create users
+        User currentUser = listingTestFactory.createUser("user1");
+        User ownerUser = listingTestFactory.createUser("user2");
+
+        // Prepare listings for ownerUser and get the list
+        List<Listing> listings = listingTestFactory.prepareDataForAllListings(ownerUser);
+
+        // Pick the listing to favorite
+        Listing listingToFavorite = listings.stream()
+            .filter(l -> "Galaxy S22".equals(l.getTitle()))
+            .findFirst()
+            .orElseThrow();
+
+        // Mark favorite
+        favoriteRepository.save(
+            new UserFavoriteListing(currentUser, listingToFavorite)
+        );
+
+        mockMvc.perform(get("/api/v1/listings")
+                .param("page", "1")
+                .param("size", "10")
+                .param("sortDir", "asc")
+                .param("sortBy", "title")
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data").isArray())
+            .andExpect(jsonPath("$.data[0].title").value("Galaxy S22"))
+            .andExpect(jsonPath("$.data[0].isFavorite").value(true))
+            .andExpect(jsonPath("$.data[1].isFavorite").value(false));
     }
 
     @Test
