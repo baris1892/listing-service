@@ -4,13 +4,13 @@ name: Listing Service CI/CD
 on:
   push:
     branches:
-      - main
+      - master
       - develop
     tags:
       - 'release/*'
   pull_request:
     branches:
-      - main
+      - master
   workflow_dispatch:
 
 jobs:
