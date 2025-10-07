@@ -10,6 +10,7 @@ import dev.baristop.portfolio.listingservice.security.entity.User;
 import dev.baristop.portfolio.listingservice.security.util.Role;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,7 +37,8 @@ public class UserListingController {
     @Secured({Role.USER})
     @Operation(
         summary = "Get all public listings",
-        description = "Returns paginated list of listings based on query parameters"
+        description = "Returns paginated list of listings based on query parameters",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     public PaginatedResponse<ListingDto> getMyListings(
         @Parameter(description = "Query parameters for filtering listings") @Valid ListingQueryRequestDto listingQueryRequestDto,
@@ -53,7 +55,8 @@ public class UserListingController {
     @Secured({Role.USER})
     @Operation(
         summary = "Get all favorited listings",
-        description = "Returns a paginated list of listings that the current user has favorited"
+        description = "Returns a paginated list of listings that the current user has favorited",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     public PaginatedResponse<ListingDto> getMyFavoriteListings(
         @Parameter(description = "Query parameters for filtering listings") @Valid ListingQueryRequestDto listingQueryRequestDto,

@@ -42,7 +42,8 @@ public class ListingController {
     @Secured({Role.USER})
     @Operation(
         summary = "Create a new listing",
-        description = "Creates a new listing with the provided data"
+        description = "Creates a new listing with the provided data",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Listing created successfully"),
@@ -57,7 +58,7 @@ public class ListingController {
     })
     public ResponseEntity<ListingCreateResponse> createListing(
         @Parameter(description = "Listing data to create", required = true) @Valid @RequestBody ListingCreateRequest listingCreateRequest,
-        @CurrentUser User user
+        @Parameter(hidden = true) @CurrentUser User user
     ) {
         Listing listing = listingService.createListing(listingCreateRequest, user);
 
@@ -74,7 +75,11 @@ public class ListingController {
 
     @PutMapping("/{id}")
     @Secured({Role.USER})
-    @Operation(summary = "Update existing listing", description = "Updates an existing listing with the provided data")
+    @Operation(
+        summary = "Update existing listing",
+        description = "Updates an existing listing with the provided data",
+        security = {@SecurityRequirement(name = "bearerAuth")}
+    )
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Listing updated successfully"),
         @ApiResponse(responseCode = "404", description = "Listing not found")
@@ -82,7 +87,7 @@ public class ListingController {
     public ResponseEntity<SuccessResponse> updateListing(
         @Parameter(description = "ID of the listing to update", required = true) @PathVariable Long id,
         @Parameter(description = "Updated listing data", required = true) @RequestBody ListingUpdateRequest updateRequest,
-        @CurrentUser User user
+        @Parameter(hidden = true) @CurrentUser User user
     ) {
         listingService.updateListing(id, updateRequest, user);
 
@@ -105,7 +110,7 @@ public class ListingController {
     })
     public ResponseEntity<SuccessResponse> deleteListing(
         @Parameter(description = "ID of the listing to delete", required = true) @PathVariable Long id,
-        @CurrentUser UserPrincipal userPrincipal
+        @Parameter(hidden = true) @CurrentUser UserPrincipal userPrincipal
     ) {
         listingService.deleteListing(id, userPrincipal);
 
@@ -132,7 +137,7 @@ public class ListingController {
     })
     public ResponseEntity<ListingDto> getListing(
         @Parameter(description = "ID of the listing to retrieve", required = true) @PathVariable Long id,
-        @CurrentUser UserPrincipal currentUser
+        @Parameter(hidden = true) @CurrentUser UserPrincipal currentUser
     ) {
         ListingDto dto = listingService.getListingById(id, currentUser);
 
@@ -147,7 +152,7 @@ public class ListingController {
     public PaginatedResponse<ListingDto> getAllListings(
         @Parameter(description = "Query parameters for filtering listings")
         @Valid ListingQueryRequestDto listingQueryRequestDto,
-        @CurrentUser User user
+        @Parameter(hidden = true) @CurrentUser User user
     ) {
         // always set ListingStatus.ACTIVE, regardless of what query param "status" was set to
         listingQueryRequestDto.setStatus(ListingStatus.ACTIVE);
@@ -158,9 +163,14 @@ public class ListingController {
 
     @PostMapping("/{listingId}/toggle-favorite")
     @Secured({Role.USER})
+    @Operation(
+        summary = "Toggle favorite listing",
+        description = "Marks/Unmarks a favorite listing",
+        security = {@SecurityRequirement(name = "bearerAuth")}
+    )
     public ToggleFavoriteResponse toggleFavorite(
         @PathVariable Long listingId,
-        @CurrentUser User user
+        @Parameter(hidden = true) @CurrentUser User user
     ) {
         boolean isFavorite = favoriteService.toggleFavorite(user.getId(), listingId);
 

@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 @ToString
 public class ListingQueryRequestDto extends PaginationRequestDto {
 
-    @Schema(description = "Filter by status")
+    @Schema(hidden = true)
     private ListingStatus status;
 
     @Schema(hidden = true)
