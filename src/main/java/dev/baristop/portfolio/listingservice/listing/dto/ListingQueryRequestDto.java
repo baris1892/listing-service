@@ -22,7 +22,7 @@ public class ListingQueryRequestDto extends PaginationRequestDto {
 
     @Schema(hidden = true)
     @Setter(AccessLevel.NONE) // prevent setting via query params (e.g. WebDataBinder)
-    private User user;
+    private User owner;
 
     @Schema(description = "Filter by title", example = "Google Pixel 8")
     private String title;
@@ -43,7 +43,7 @@ public class ListingQueryRequestDto extends PaginationRequestDto {
 
     // No public setter to avoid external manipulation.
     // This method allows controlled internal updates (e.g. by service or controller).
-    public void updateUser(User user) {
-        this.user = user;
+    public void updateOwner(User user) {
+        this.owner = user;
     }
 }

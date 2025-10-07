@@ -36,7 +36,7 @@ public class UserListingController {
         @Parameter(description = "Query parameters for filtering listings") @Valid ListingQueryRequestDto listingQueryRequestDto,
         @CurrentUser User user
     ) {
-        listingQueryRequestDto.updateUser(user);
+        listingQueryRequestDto.updateOwner(user);
 
         Page<ListingDto> resultPage = listingService.getAllListings(listingQueryRequestDto, user);
 

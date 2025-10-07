@@ -77,9 +77,9 @@ public class ListingSpecification {
                 );
             }
 
-            if (requestDto.getUser() != null) {
+            if (requestDto.getOwner() != null) {
                 predicates.add(
-                    cb.equal(root.get(Listing_.owner), requestDto.getUser())
+                    cb.equal(root.get(Listing_.owner), requestDto.getOwner())
                 );
             }
 
