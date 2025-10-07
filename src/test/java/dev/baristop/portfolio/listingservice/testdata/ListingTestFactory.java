@@ -55,6 +55,20 @@ public class ListingTestFactory {
         return listingRepository.save(listing);
     }
 
+    public Listing createListing(String title) {
+        User owner = userTestFactory.createDefaultUser();
+
+        Listing listing = new Listing();
+        listing.setTitle(title);
+        listing.setDescription("Test Description");
+        listing.setCity("Test City");
+        listing.setPrice(BigDecimal.valueOf(100));
+        listing.setOwner(owner);
+        listing.setStatus(ListingStatus.PENDING);
+
+        return listingRepository.save(listing);
+    }
+
     public List<Listing> prepareDataForAllListings(User user) {
         listingRepository.deleteAll();
         List<Listing> listings = List.of(

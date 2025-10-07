@@ -14,10 +14,11 @@ public class UserTestFactory {
         User user = new User();
         user.setKeycloakId(id);
 
-        return userRepository.saveAndFlush(user);
+        return userRepository.save(user);
     }
 
     public User createDefaultUser() {
-        return createUser("test-id");
+        return userRepository.findByKeycloakId("test-id")
+            .orElseGet(() -> createUser("test-id"));
     }
 }
