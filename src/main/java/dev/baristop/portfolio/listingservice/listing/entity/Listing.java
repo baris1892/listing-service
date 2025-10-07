@@ -64,4 +64,19 @@ public class Listing {
     public boolean isOwner(UserPrincipal user) {
         return this.getOwner().getKeycloakId().equals(user.id());
     }
+
+    @Override
+    public String toString() {
+        return "Listing{" +
+            "id=" + id +
+            ", title='" + title + '\'' +
+            ", description='" + description + '\'' +
+            ", price=" + price +
+            ", city='" + city + '\'' +
+            ", status=" + status +
+            ", owner=" + owner +
+            ", createdAt=" + createdAt +
+            ", updatedAt=" + updatedAt +
+            '}';
+    }
 }

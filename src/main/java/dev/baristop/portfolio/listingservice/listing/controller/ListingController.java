@@ -3,6 +3,7 @@ package dev.baristop.portfolio.listingservice.listing.controller;
 import dev.baristop.portfolio.listingservice.listing.dto.*;
 import dev.baristop.portfolio.listingservice.listing.entity.Listing;
 import dev.baristop.portfolio.listingservice.listing.entity.ListingStatus;
+import dev.baristop.portfolio.listingservice.listing.service.FavoriteService;
 import dev.baristop.portfolio.listingservice.listing.service.ListingService;
 import dev.baristop.portfolio.listingservice.response.ErrorResponse;
 import dev.baristop.portfolio.listingservice.response.PaginatedResponse;
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.*;
 public class ListingController {
 
     private final ListingService listingService;
+    private final FavoriteService favoriteService;
 
     @PostMapping
     @Secured({Role.USER})
@@ -153,4 +155,14 @@ public class ListingController {
         return new PaginatedResponse<>(resultPage);
     }
 
+    @PostMapping("/{listingId}/toggle-favorite")
+    @Secured({Role.USER})
+    public ToggleFavoriteResponse toggleFavorite(
+        @PathVariable Long listingId,
+        @CurrentUser User user
+    ) {
+        boolean isFavorite = favoriteService.toggleFavorite(user.getId(), listingId);
+
+        return new ToggleFavoriteResponse(isFavorite);
+    }
 }

@@ -30,4 +30,12 @@ public class User {
     public User(String keycloakId) {
         this.keycloakId = keycloakId;
     }
+
+    @Override
+    public String toString() {
+        return "User{" +
+            "id=" + id +
+            ", keycloakId='" + keycloakId + '\'' +
+            '}';
+    }
 }
