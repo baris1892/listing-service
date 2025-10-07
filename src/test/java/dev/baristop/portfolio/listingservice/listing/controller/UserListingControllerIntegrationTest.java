@@ -4,6 +4,7 @@ import dev.baristop.portfolio.listingservice.security.WithMockCustomUser;
 import dev.baristop.portfolio.listingservice.security.entity.User;
 import dev.baristop.portfolio.listingservice.security.util.Role;
 import dev.baristop.portfolio.listingservice.testdata.ListingTestFactory;
+import dev.baristop.portfolio.listingservice.testdata.UserTestFactory;
 import dev.baristop.portfolio.listingservice.utils.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,9 @@ public class UserListingControllerIntegrationTest extends AbstractIntegrationTes
     @Autowired
     private ListingTestFactory listingTestFactory;
 
+    @Autowired
+    private UserTestFactory userTestFactory;
+
     @Test
     public void getMyListings_shouldReturn401() throws Exception {
         mockMvc.perform(get("/api/v1/users/me/listings"))
@@ -30,7 +34,7 @@ public class UserListingControllerIntegrationTest extends AbstractIntegrationTes
     @Test
     @WithMockCustomUser(id = "test-user1", roles = {Role.USER})
     public void getMyListings_shouldReturn200() throws Exception {
-        User user = listingTestFactory.createUser("test-user1");
+        User user = userTestFactory.createUser("test-user1");
         listingTestFactory.prepareDataForAllListings(user);
 
         mockMvc.perform(get("/api/v1/users/me/listings"))

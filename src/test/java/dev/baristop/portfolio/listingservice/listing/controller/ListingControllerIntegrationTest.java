@@ -11,6 +11,7 @@ import dev.baristop.portfolio.listingservice.security.WithMockCustomUser;
 import dev.baristop.portfolio.listingservice.security.entity.User;
 import dev.baristop.portfolio.listingservice.security.util.Role;
 import dev.baristop.portfolio.listingservice.testdata.ListingTestFactory;
+import dev.baristop.portfolio.listingservice.testdata.UserTestFactory;
 import dev.baristop.portfolio.listingservice.utils.AbstractIntegrationTest;
 import dev.baristop.portfolio.listingservice.utils.JsonTestUtils;
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,9 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private ListingTestFactory listingTestFactory;
+
+    @Autowired
+    private UserTestFactory userTestFactory;
 
     @Autowired
     private UserFavoriteListingRepository favoriteRepository;
@@ -329,7 +333,7 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void getAllListing_shouldReturn200() throws Exception {
-        User user = listingTestFactory.createUser("test-user1");
+        User user = userTestFactory.createUser("test-user1");
 
         listingTestFactory.prepareDataForAllListings(user);
 
@@ -349,7 +353,7 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void getAllListing_shouldReturn200_whenFilteredByTitle() throws Exception {
-        User user = listingTestFactory.createUser("test-user1");
+        User user = userTestFactory.createUser("test-user1");
 
         listingTestFactory.prepareDataForAllListings(user);
 
@@ -369,7 +373,7 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void getAllListing_shouldReturn200_whenFilteredByPrice() throws Exception {
-        User user = listingTestFactory.createUser("test-user1");
+        User user = userTestFactory.createUser("test-user1");
 
         listingTestFactory.prepareDataForAllListings(user);
 
@@ -389,7 +393,7 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void getAllListing_shouldReturn200_whenFilteredByTitleAndPrice() throws Exception {
-        User user = listingTestFactory.createUser("test-user1");
+        User user = userTestFactory.createUser("test-user1");
 
         listingTestFactory.prepareDataForAllListings(user);
 
@@ -413,8 +417,8 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
     @WithMockCustomUser(id = "user1", roles = {Role.USER})
     public void getAllListing_shouldReturn200WithFavoriteFlag() throws Exception {
         // Create users
-        User currentUser = listingTestFactory.createUser("user1");
-        User ownerUser = listingTestFactory.createUser("user2");
+        User currentUser = userTestFactory.createUser("user1");
+        User ownerUser = userTestFactory.createUser("user2");
 
         // Prepare listings for ownerUser and get the list
         List<Listing> listings = listingTestFactory.prepareDataForAllListings(ownerUser);
@@ -448,7 +452,7 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
     void toggleFavoriteListing_shouldToggleFavoriteTwice() throws Exception {
         // Prepare test data
         Listing listing = listingTestFactory.createDefaultListing();
-        User currentUser = listingTestFactory.createUser("user1");
+        User currentUser = userTestFactory.createUser("user1");
 
         // Ensure no favorites exist initially
         assertTrue(

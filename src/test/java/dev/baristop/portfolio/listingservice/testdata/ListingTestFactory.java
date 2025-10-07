@@ -6,12 +6,10 @@ import dev.baristop.portfolio.listingservice.listing.entity.Listing;
 import dev.baristop.portfolio.listingservice.listing.entity.ListingStatus;
 import dev.baristop.portfolio.listingservice.listing.repository.ListingRepository;
 import dev.baristop.portfolio.listingservice.security.entity.User;
-import dev.baristop.portfolio.listingservice.security.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.List;
 
 @Component
@@ -21,25 +19,7 @@ public class ListingTestFactory {
     private ListingRepository listingRepository;
 
     @Autowired
-    private UserRepository userRepository;
-
-    public Listing sampleListing(String title, User owner) {
-        if (owner == null) {
-            owner = createUser("dummy-keycloak-id");
-        }
-
-        Listing listing = new Listing();
-        listing.setTitle(title);
-        listing.setDescription("This is a test listing");
-        listing.setPrice(BigDecimal.valueOf(100));
-        listing.setCity("Saarlouis");
-        listing.setStatus(ListingStatus.PENDING);
-        listing.setOwner(owner);
-        listing.setCreatedAt(Instant.now());
-        listing.setUpdatedAt(Instant.now());
-
-        return listingRepository.saveAndFlush(listing);
-    }
+    private UserTestFactory userTestFactory;
 
     public ListingCreateRequest defaultListingCreateRequest() {
         ListingCreateRequest request = new ListingCreateRequest();
@@ -62,7 +42,7 @@ public class ListingTestFactory {
     }
 
     public Listing createDefaultListing() {
-        User owner = createDefaultUser();
+        User owner = userTestFactory.createDefaultUser();
 
         Listing listing = new Listing();
         listing.setTitle("Test Title");
@@ -73,17 +53,6 @@ public class ListingTestFactory {
         listing.setStatus(ListingStatus.PENDING);
 
         return listingRepository.save(listing);
-    }
-
-    public User createUser(String id) {
-        User user = new User();
-        user.setKeycloakId(id);
-
-        return userRepository.saveAndFlush(user);
-    }
-
-    public User createDefaultUser() {
-        return createUser("test-id");
     }
 
     public List<Listing> prepareDataForAllListings(User user) {
