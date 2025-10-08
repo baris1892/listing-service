@@ -2,6 +2,8 @@ package dev.baristop.portfolio.listingservice.listing.service;
 
 import dev.baristop.portfolio.listingservice.exception.InvalidListingStateException;
 import dev.baristop.portfolio.listingservice.exception.ResourceNotFoundException;
+import dev.baristop.portfolio.listingservice.kafka.ListingStatusProducer;
+import dev.baristop.portfolio.listingservice.kafka.dto.ListingStatusChangedEvent;
 import dev.baristop.portfolio.listingservice.listing.dto.ListingCreateRequest;
 import dev.baristop.portfolio.listingservice.listing.dto.ListingDto;
 import dev.baristop.portfolio.listingservice.listing.dto.ListingQueryRequestDto;
@@ -38,6 +40,7 @@ public class ListingService {
     private final UserFavoriteListingRepository favoriteRepository;
     private final ValidationUtil validationUtil;
     private final ListingMapper listingMapper;
+    private final ListingStatusProducer listingStatusProducer;
 
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("id", "title", "price");
 
@@ -170,7 +173,15 @@ public class ListingService {
         listing.setStatus(status);
         listingRepository.save(listing);
 
-        // TODO: produce kafka event
+        // produce kafka event
+        ListingStatusChangedEvent event = new ListingStatusChangedEvent(
+            listing.getStatus(),
+            listing.getOwner().getEmail(),
+            listing.getId(),
+            listing.getTitle(),
+            listing.getDescription()
+        );
+        listingStatusProducer.sendListingStatusEvent(event);
 
         return listing;
     }

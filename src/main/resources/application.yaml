@@ -20,10 +20,17 @@ spring:
     properties:
       hibernate:
         show_sql: false
+
   servlet:
     multipart:
       max-file-size: 5MB
       max-request-size: 5MB
+
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 management:
   endpoints:
