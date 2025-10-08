@@ -11,11 +11,12 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public User getOrCreateUserByKeycloakId(String keycloakId) {
+    public User getOrCreateUserByKeycloakId(String keycloakId, String email) {
         return userRepository.findByKeycloakId(keycloakId)
             .orElseGet(() -> {
                 User user = new User();
                 user.setKeycloakId(keycloakId);
+                user.setEmail(email);
 
                 return userRepository.save(user);
             });

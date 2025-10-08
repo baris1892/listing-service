@@ -38,7 +38,7 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
         }
 
         if (parameter.getParameterType().equals(User.class)) {
-            return userService.getOrCreateUserByKeycloakId(principal.id());
+            return userService.getOrCreateUserByKeycloakId(principal.id(), principal.email());
         } else if (parameter.getParameterType().equals(UserPrincipal.class)) {
             return principal;
         }

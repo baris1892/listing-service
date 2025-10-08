@@ -21,6 +21,9 @@ public class User {
     @Column(name = "keycloak_id", nullable = false, unique = true)
     private String keycloakId;
 
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
+
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Listing> listings = new ArrayList<>();
 
@@ -36,6 +39,7 @@ public class User {
         return "User{" +
             "id=" + id +
             ", keycloakId='" + keycloakId + '\'' +
+            ", email='" + email + '\'' +
             '}';
     }
 }

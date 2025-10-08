@@ -13,6 +13,7 @@ public class UserTestFactory {
     public User createUser(String id) {
         User user = new User();
         user.setKeycloakId(id);
+        user.setEmail(id + "@example.com");
 
         return userRepository.save(user);
     }
