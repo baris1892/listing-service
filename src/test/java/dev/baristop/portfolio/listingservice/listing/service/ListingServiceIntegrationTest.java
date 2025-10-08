@@ -10,6 +10,7 @@ import dev.baristop.portfolio.listingservice.security.entity.User;
 import dev.baristop.portfolio.listingservice.security.repository.UserRepository;
 import dev.baristop.portfolio.listingservice.testdata.ListingTestFactory;
 import dev.baristop.portfolio.listingservice.testdata.UserTestFactory;
+import dev.baristop.portfolio.listingservice.utils.AbstractIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @Testcontainers
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
-class ListingServiceIntegrationTest {
+class ListingServiceIntegrationTest extends AbstractIntegrationTest {
 
     @Container
     static GenericContainer<?> redis = new GenericContainer<>("redis:7-alpine")
