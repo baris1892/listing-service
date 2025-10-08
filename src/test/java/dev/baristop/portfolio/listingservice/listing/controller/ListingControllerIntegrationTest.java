@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -243,6 +244,27 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
 
         assertThat(listingRepository.findById(listing.getId()))
             .isEmpty();
+    }
+
+    @Test
+    @WithMockCustomUser(id = "not-owner", roles = {Role.ADMIN})
+    @Transactional
+    void deleteListing_shouldReturn200_whenAdminAndHasUserFavoriteListing() throws Exception {
+        User currentUser = userTestFactory.createUser("user1");
+        Listing listing = listingTestFactory.createDefaultListing();
+
+        assertThat(listingRepository.findById(listing.getId())).isPresent();
+
+        UserFavoriteListing favorite = new UserFavoriteListing(currentUser, listing);
+        listing.addFavorite(favorite);
+        listingRepository.save(listing);
+        assertThat(favoriteRepository.count()).isEqualTo(1);
+
+        mockMvc.perform(delete("/api/v1/listings/{id}", listing.getId()))
+            .andExpect(status().isOk());
+
+        assertThat(listingRepository.findById(listing.getId())).isEmpty();
+        assertThat(favoriteRepository.count()).isEqualTo(0);
     }
 
     @Test

@@ -9,6 +9,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "listings")
@@ -38,6 +40,9 @@ public class Listing {
 
     @Column(nullable = false)
     private Instant updatedAt = Instant.now();
+
+    @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserFavoriteListing> favorites = new ArrayList<>();
 
     public Listing(String title, String description, BigDecimal price, String city, ListingStatus status, User owner) {
         this.title = title;
@@ -78,5 +83,13 @@ public class Listing {
             ", createdAt=" + createdAt +
             ", updatedAt=" + updatedAt +
             '}';
+    }
+
+    public void addFavorite(UserFavoriteListing favorite) {
+        // Update the inverse side (Listing's collection)
+        this.favorites.add(favorite);
+
+        // Update the owning side (UserFavoriteListing's 'listing' field)
+        favorite.setListing(this);
     }
 }
