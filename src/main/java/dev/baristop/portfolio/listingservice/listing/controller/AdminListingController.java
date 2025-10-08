@@ -1,7 +1,7 @@
 package dev.baristop.portfolio.listingservice.listing.controller;
 
+import dev.baristop.portfolio.listingservice.listing.dto.ListingDto;
 import dev.baristop.portfolio.listingservice.listing.dto.ListingStatusResponse;
-import dev.baristop.portfolio.listingservice.listing.entity.Listing;
 import dev.baristop.portfolio.listingservice.listing.entity.ListingStatus;
 import dev.baristop.portfolio.listingservice.listing.service.ListingService;
 import dev.baristop.portfolio.listingservice.security.util.Role;
@@ -23,14 +23,14 @@ public class AdminListingController {
 
     @PatchMapping("/{id}/approve")
     public ResponseEntity<ListingStatusResponse> approveListing(@PathVariable Long id) {
-        Listing updated = listingService.updateListingStatus(id, ListingStatus.APPROVED);
+        ListingDto updated = listingService.updateListingStatus(id, ListingStatus.APPROVED);
 
         return ResponseEntity.ok(new ListingStatusResponse(updated.getStatus()));
     }
 
     @PatchMapping("/{id}/reject")
     public ResponseEntity<ListingStatusResponse> rejectListing(@PathVariable Long id) {
-        Listing updated = listingService.updateListingStatus(id, ListingStatus.REJECTED);
+        ListingDto updated = listingService.updateListingStatus(id, ListingStatus.REJECTED);
 
         return ResponseEntity.ok(new ListingStatusResponse(updated.getStatus()));
     }

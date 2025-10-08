@@ -20,6 +20,9 @@ import dev.baristop.portfolio.listingservice.util.ValidationUtil;
 import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +30,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Set;
@@ -44,6 +48,7 @@ public class ListingService {
 
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("id", "title", "price");
 
+    @Transactional
     public Listing createListing(
         ListingCreateRequest listingCreateRequest,
         User owner
@@ -62,7 +67,9 @@ public class ListingService {
         return listing;
     }
 
-    public void updateListing(Long listingId, ListingUpdateRequest updateRequest, User user) {
+    @Transactional
+    @CachePut(value = "listings", key = "#listingId")
+    public ListingDto updateListing(Long listingId, ListingUpdateRequest updateRequest, User user) {
         Listing existingListing = listingRepository.findById(listingId)
             .orElseThrow(() -> new ResourceNotFoundException("Listing with ID " + listingId + " not found"));
 
@@ -82,8 +89,13 @@ public class ListingService {
         existingListing.setCity(updateRequest.getCity());
 
         listingRepository.save(existingListing);
+        log.info("Updated listing with id={}", listingId);
+
+        return listingMapper.toDto(existingListing);
     }
 
+    @Transactional
+    @CacheEvict(value = "listings", key = "#listingId")
     public void deleteListing(Long listingId, UserPrincipal userPrincipal) {
         Listing existingListing = listingRepository.findById(listingId)
             .orElseThrow(() -> new ResourceNotFoundException("Listing with ID " + listingId + " not found"));
@@ -95,6 +107,7 @@ public class ListingService {
         }
 
         listingRepository.delete(existingListing);
+        log.info("Deleted listing with id={}", listingId);
     }
 
     /**
@@ -110,7 +123,11 @@ public class ListingService {
      *
      * @throws ResourceNotFoundException if the listing does not exist or is pending and the user is not authorized
      */
+    @Transactional(readOnly = true)
+    @Cacheable(value = "listings", key = "#listingId")
     public ListingDto getListingById(Long listingId, @Nullable UserPrincipal userPrincipal) {
+        log.info("Getting listing with id={}", listingId);
+
         Listing listing = listingRepository.findById(listingId)
             .orElseThrow(() -> new ResourceNotFoundException("Listing with ID " + listingId + " not found"));
 
@@ -123,6 +140,7 @@ public class ListingService {
         return listingMapper.toDto(listing);
     }
 
+    @Transactional(readOnly = true)
     public Page<ListingDto> getAllListings(
         ListingQueryRequestDto request,
         @Nullable User currentUser
@@ -162,7 +180,9 @@ public class ListingService {
         });
     }
 
-    public Listing updateListingStatus(Long listingId, ListingStatus status) {
+    @Transactional
+    @CachePut(value = "listings", key = "#listingId")
+    public ListingDto updateListingStatus(Long listingId, ListingStatus status) {
         Listing listing = listingRepository.findById(listingId)
             .orElseThrow(() -> new ResourceNotFoundException("Listing not found with id: " + listingId));
 
@@ -183,6 +203,6 @@ public class ListingService {
         );
         listingStatusProducer.sendListingStatusEvent(event);
 
-        return listing;
+        return listingMapper.toDto(listing);
     }
 }
