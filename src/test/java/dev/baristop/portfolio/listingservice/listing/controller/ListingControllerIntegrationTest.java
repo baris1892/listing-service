@@ -161,7 +161,7 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
     @WithMockCustomUser(roles = {Role.USER})
     void updateListing_shouldThrowInvalidListingState_whenNotPending() throws Exception {
         Listing listing = listingTestFactory.createDefaultListing();
-        listing.setStatus(ListingStatus.ACTIVE);
+        listing.setStatus(ListingStatus.APPROVED);
         listingRepository.saveAndFlush(listing);
 
         ListingUpdateRequest updateRequest = listingTestFactory.defaultListingUpdateRequest();
@@ -262,7 +262,7 @@ public class ListingControllerIntegrationTest extends AbstractIntegrationTest {
     @Test
     void getListing_shouldReturn200_whenListingStatusNotPending() throws Exception {
         Listing listing = listingTestFactory.createDefaultListing();
-        listing.setStatus(ListingStatus.ACTIVE);
+        listing.setStatus(ListingStatus.APPROVED);
         listingRepository.saveAndFlush(listing);
 
         mockMvc.perform(get("/api/v1/listings/{id}", listing.getId()))

@@ -154,8 +154,8 @@ public class ListingController {
         @Valid ListingQueryRequestDto listingQueryRequestDto,
         @Parameter(hidden = true) @CurrentUser User user
     ) {
-        // always set ListingStatus.ACTIVE, regardless of what query param "status" was set to
-        listingQueryRequestDto.setStatus(ListingStatus.ACTIVE);
+        // always set ListingStatus.APPROVED, regardless of what query param "status" was set to
+        listingQueryRequestDto.setStatus(ListingStatus.APPROVED);
         Page<ListingDto> resultPage = listingService.getAllListings(listingQueryRequestDto, user);
 
         return new PaginatedResponse<>(resultPage);
