@@ -13,8 +13,11 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     show-sql: false
+
+  flyway:
+    enabled: false
 
 logging:
   pattern:
