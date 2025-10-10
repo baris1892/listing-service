@@ -17,7 +17,7 @@ public interface ListingRepository extends JpaRepository<Listing, Long>, JpaSpec
 
     Optional<Listing> findByTitleAndDescriptionAndCity(String title, String description, String city);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query(value = """
             UPDATE Listing l
             SET l.status = :newStatus,
