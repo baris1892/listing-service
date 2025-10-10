@@ -33,6 +33,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Set;
 
 @Service
@@ -204,5 +206,20 @@ public class ListingService {
         listingStatusProducer.sendListingStatusEvent(event);
 
         return listingMapper.toDto(listing);
+    }
+
+    @Transactional
+    public int disableListingsOlderThanDays(int days) {
+        Instant threshold = LocalDate.now()
+            .minusDays(days)
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant();
+
+        return listingRepository.updateStatusOlderThan(
+            threshold,
+            ListingStatus.APPROVED,
+            ListingStatus.INACTIVE,
+            Instant.now()
+        );
     }
 }
