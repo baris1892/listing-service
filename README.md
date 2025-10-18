@@ -1,4 +1,5 @@
 # Listing Service
+![GitHub Actions](https://github.com/baris-top-portfolio/listing-service/workflows/Listing%20Service%20CI/CD/badge.svg)
 
 Event-driven microservice handling CRUD operations for listings, integrated with Kafka, Redis, Keycloak, and
 PostgreSQL. This service demonstrates modern microservice patterns, event-driven architecture, and secure API design.
@@ -69,8 +70,6 @@ see [Event Flows](./docs/flows.md).
   ![Swagger UI Screenshot](./docs/assets/swagger-ui.png)
 
 ## 🔄 CI/CD
-
-![GitHub Actions](https://github.com/baris-top-portfolio/listing-service/workflows/Listing%20Service%20CI/CD/badge.svg)
 
 This project uses **GitHub Actions** for continuous integration (and deployment):
 
