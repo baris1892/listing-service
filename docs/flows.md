@@ -41,6 +41,7 @@ sequenceDiagram
     ListingService -->> User: Return confirmation
     Admin ->> ListingService: PATCH /api/v1/admin/listings/{id}/approve
     ListingService ->> PostgresDB: Update status=APPROVED
+    ListingService -->> Admin: Return approval confirmation
     ListingService ->> Kafka: Produce ListingStatusChangedEvent
     Kafka -->> MessagingService: Consume ListingStatusChangedEvent
     MessagingService -->> User: Send notification email
