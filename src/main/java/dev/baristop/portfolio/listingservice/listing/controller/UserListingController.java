@@ -36,8 +36,8 @@ public class UserListingController {
     @GetMapping("/listings")
     @Secured({Role.USER})
     @Operation(
-        summary = "Get all public listings",
-        description = "Returns paginated list of listings based on query parameters",
+        summary = "List current user's listings",
+        description = "Returns a paginated list of all listings created by the authenticated user, supporting filtering and sorting.",
         security = {@SecurityRequirement(name = "bearerAuth")}
     )
     public PaginatedResponse<ListingDto> getMyListings(
@@ -54,8 +54,8 @@ public class UserListingController {
     @GetMapping("/favorites")
     @Secured({Role.USER})
     @Operation(
-        summary = "Get all favorited listings",
-        description = "Returns a paginated list of listings that the current user has favorited",
+        summary = "List user's favorited listings",
+        description = "Returns a paginated list of listings that the authenticated user has marked as favorites, with support for filtering and sorting.",
         security = {@SecurityRequirement(name = "bearerAuth")}
     )
     public PaginatedResponse<ListingDto> getMyFavoriteListings(
