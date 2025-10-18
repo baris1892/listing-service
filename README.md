@@ -12,31 +12,29 @@ data storage.
 
 The diagram summarizes the interaction between:
 
-- **Listing Service** (Spring Boot) – handles CRUD APIs and publishes events
+- **Listing Service** (Spring Boot) – handles CRUD APIs, persists data in PostgreSQL, and publishes events
 - **Messaging Service** (Spring Boot) – consumes Kafka events to send notifications
 - **Kafka** – event-driven messaging
 - **Redis** – caching layer
-- **Keycloak** – authentication and authorization
+- **Keycloak** – authentication and authorization (uses separate PostgreSQL instance)
 
-## 🔍 Explore Detailed Flows
+### 🔍 Explore Detailed Flows
 
 For **detailed system flows, sequence diagrams, and design decisions**,
 see [Event Flows](./docs/flows.md).
 
----
-
 ## 🛠️ Technology Stack
 
 - **Spring Boot 3** – microservice framework
-- **PostgreSQL 16** – relational database
-- **Kafka 3.x** – event-driven messaging
-- **Redis 7** – caching layer
+- **PostgreSQL** – relational database
+- **Kafka** – event-driven messaging
+- **Redis** – caching layer
 - **Testcontainers** – local integration tests (Postgres, Redis)
 - **JUnit + Mockito** – unit & integration testing
 - **Picocli** – CLI command support (e.g. `DisableListingsCommand`)
 - **Lombok** – reduce boilerplate in DTOs / entities
 - **MapStruct** – clean DTO ↔ Entity mapping
-- **Keycloak 26** – OAuth2 / OpenID Connect authentication
+- **Keycloak** – OAuth2 / OpenID Connect authentication
 
 ## 🎨 Design Decisions
 
@@ -65,13 +63,12 @@ see [Event Flows](./docs/flows.md).
     - Flexible listing queries with pagination and filter parameters.
 
 - **CLI Commands (Picocli)**:
-    - Example: `mvn spring-boot:run -Dspring-boot.run.arguments="listings:disable --older-than 11"`
-
+    - Provides convenient commands for batch operations, e.g., disabling old listings.
 
 - **Swagger UI / API documentation**
   ![Swagger UI Screenshot](./docs/assets/swagger-ui.png)
 
-## CI/CD
+## 🔄 CI/CD
 
 ![GitHub Actions](https://github.com/baris-top-portfolio/listing-service/workflows/Listing%20Service%20CI/CD/badge.svg)
 

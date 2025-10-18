@@ -62,3 +62,14 @@ Once started, the service will be available at:
 
 Swagger UI (API documentation) is accessible at:  
 👉 http://localhost:8080/docs
+
+## Bonus: Run Picocli Command
+
+To run CLI commands provided by the Listing Service (Picocli), execute:
+
+```
+export $(grep -v '^#' .env | xargs) && \
+ mvn spring-boot:run -Dspring-boot.run.arguments="listings:disable --older-than 11"
+```
+
+This lets you, for example, disable listings older than 11 days.
