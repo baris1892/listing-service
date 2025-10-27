@@ -1,4 +1,7 @@
 # Listing Service
+
+> ⚠️ **Portfolio / Demo** — This repository is part of a personal portfolio
+
 ![GitHub Actions](https://github.com/baris-top-portfolio/listing-service/workflows/Listing%20Service%20CI/CD/badge.svg)
 
 Event-driven microservice handling CRUD operations for listings, integrated with Kafka, Redis, Keycloak, and
