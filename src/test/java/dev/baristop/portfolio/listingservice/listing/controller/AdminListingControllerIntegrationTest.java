@@ -87,7 +87,7 @@ public class AdminListingControllerIntegrationTest extends AbstractIntegrationTe
         ListingStatusChangedEvent eventSent = captor.getValue();
         assertThat(eventSent.getListingTitle()).isEqualTo("Test Listing");
         assertThat(eventSent.getStatus()).isEqualTo(ListingStatus.APPROVED);
-        assertThat(eventSent.getRecipientEmail()).isEqualTo("user1@example.com");
+        assertThat(eventSent.getRecipient()).isEqualTo("user1@example.com");
     }
 
     @Test
@@ -116,6 +116,6 @@ public class AdminListingControllerIntegrationTest extends AbstractIntegrationTe
         ListingStatusChangedEvent eventSent = captor.getValue();
         assertThat(eventSent.getListingTitle()).isEqualTo("Test Listing");
         assertThat(eventSent.getStatus()).isEqualTo(ListingStatus.REJECTED);
-        assertThat(eventSent.getRecipientEmail()).isEqualTo("user1@example.com");
+        assertThat(eventSent.getRecipient()).isEqualTo("user1@example.com");
     }
 }

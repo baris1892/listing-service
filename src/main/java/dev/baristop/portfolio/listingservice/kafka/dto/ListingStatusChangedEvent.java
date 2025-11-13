@@ -10,7 +10,7 @@ import lombok.*;
 @ToString
 public class ListingStatusChangedEvent {
     private ListingStatus status;
-    private String recipientEmail;
+    private String recipient;
     private Long listingId;
     private String listingTitle;
     private String listingDescription;
