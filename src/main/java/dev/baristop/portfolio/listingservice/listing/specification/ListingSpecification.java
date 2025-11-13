@@ -56,7 +56,9 @@ public class ListingSpecification {
             }
 
             if (hasText(requestDto.getCity())) {
-                predicates.add(ilike(cb, root.get(Listing_.city), requestDto.getCity()));
+                predicates.add(
+                    ilike(cb, root.get(Listing_.city), requestDto.getCity())
+                );
             }
 
             if (requestDto.getPriceFrom() != null) {
