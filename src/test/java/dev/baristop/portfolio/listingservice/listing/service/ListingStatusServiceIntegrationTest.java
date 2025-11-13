@@ -3,6 +3,7 @@ package dev.baristop.portfolio.listingservice.listing.service;
 import dev.baristop.portfolio.listingservice.kafka.ListingStatusProducer;
 import dev.baristop.portfolio.listingservice.listing.dto.ListingDto;
 import dev.baristop.portfolio.listingservice.listing.entity.Listing;
+import dev.baristop.portfolio.listingservice.listing.entity.ListingStatus;
 import dev.baristop.portfolio.listingservice.listing.repository.ListingRepository;
 import dev.baristop.portfolio.listingservice.security.dto.UserPrincipal;
 import dev.baristop.portfolio.listingservice.security.entity.User;
@@ -25,12 +26,11 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Testcontainers
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
-class ListingServiceIntegrationTest extends AbstractIntegrationTest {
+class ListingStatusServiceIntegrationTest extends AbstractIntegrationTest {
 
     @Container
     static GenericContainer<?> redis = new GenericContainer<>("redis:7-alpine")
@@ -44,6 +44,9 @@ class ListingServiceIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private ListingService listingService;
+
+    @Autowired
+    private ListingStatusService listingStatusService;
 
     @Autowired
     private ListingRepository listingRepository;
@@ -82,24 +85,22 @@ class ListingServiceIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldReturnCachedListing_OnSecondInvocation() {
-        Listing listing = listingTestFactory.createListing("Redis Test");
+    void testUpdateListingStatus_CachePutEviction() {
+        Listing listing = listingTestFactory.createListing("Status Test");
         listing.setOwner(owner);
         listingRepository.saveAndFlush(listing);
 
         Long id = listing.getId();
 
-        // 1st call -> should hit DB
-        ListingDto dto1 = listingService.getListingById(id, ownerPrincipal);
-        assertNotNull(dto1);
-        assertEquals("Redis Test", dto1.getTitle());
+        // Prime cache
+        ListingDto dto = listingService.getListingById(id, ownerPrincipal);
+        assertEquals("Status Test", dto.getTitle());
 
-        // 2nd call -> should hit Redis cache
-        ListingDto dto2 = listingService.getListingById(id, ownerPrincipal);
-        assertNotNull(dto2);
-        assertEquals(dto1.getId(), dto2.getId());
+        // Update status (CachePut should update cache)
+        listingStatusService.updateListingStatus(id, ListingStatus.APPROVED);
 
-        // Verify same content from cache
-        assertEquals(dto1.getTitle(), dto2.getTitle());
+        // Fetch again -> should reflect updated status from cache
+        ListingDto updatedDto = listingService.getListingById(id, null);
+        assertEquals(ListingStatus.APPROVED, updatedDto.getStatus());
     }
 }

@@ -3,7 +3,7 @@ package dev.baristop.portfolio.listingservice.listing.controller;
 import dev.baristop.portfolio.listingservice.listing.dto.ListingDto;
 import dev.baristop.portfolio.listingservice.listing.dto.ListingStatusResponse;
 import dev.baristop.portfolio.listingservice.listing.entity.ListingStatus;
-import dev.baristop.portfolio.listingservice.listing.service.ListingService;
+import dev.baristop.portfolio.listingservice.listing.service.ListingStatusService;
 import dev.baristop.portfolio.listingservice.security.util.Role;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Listing", description = "Admin operations on listings")
 public class AdminListingController {
 
-    private final ListingService listingService;
+    private final ListingStatusService listingStatusService;
 
     @PatchMapping("/{id}/approve")
     @Operation(
@@ -44,7 +44,8 @@ public class AdminListingController {
     }
 
     private ResponseEntity<ListingStatusResponse> updateStatus(Long id, ListingStatus status) {
-        ListingDto updated = listingService.updateListingStatus(id, status);
+        ListingDto updated = listingStatusService.updateListingStatus(id, status);
+
         return ResponseEntity.ok(new ListingStatusResponse(updated.getStatus()));
     }
 }
