@@ -11,6 +11,7 @@ import dev.baristop.portfolio.listingservice.security.util.Role;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,6 +29,7 @@ import java.util.Set;
 @RequestMapping("/api/v1/users/me")
 @AllArgsConstructor
 @Validated
+@Tag(name = "Listing", description = "Operations related to listings and user favorites")
 public class UserListingController {
 
     private final ListingService listingService;

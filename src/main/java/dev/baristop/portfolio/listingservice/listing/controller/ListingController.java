@@ -3,7 +3,6 @@ package dev.baristop.portfolio.listingservice.listing.controller;
 import dev.baristop.portfolio.listingservice.listing.dto.*;
 import dev.baristop.portfolio.listingservice.listing.entity.Listing;
 import dev.baristop.portfolio.listingservice.listing.entity.ListingStatus;
-import dev.baristop.portfolio.listingservice.listing.service.FavoriteService;
 import dev.baristop.portfolio.listingservice.listing.service.ListingService;
 import dev.baristop.portfolio.listingservice.response.ErrorResponse;
 import dev.baristop.portfolio.listingservice.response.PaginatedResponse;
@@ -20,6 +19,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,10 +33,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/listings")
 @AllArgsConstructor
 @Validated
+@Tag(name = "Listing", description = "Operations related to listings and favorites")
 public class ListingController {
 
     private final ListingService listingService;
-    private final FavoriteService favoriteService;
 
     @PostMapping
     @Secured({Role.USER})
@@ -159,21 +159,5 @@ public class ListingController {
         Page<ListingDto> resultPage = listingService.getAllListings(listingQueryRequestDto, user);
 
         return new PaginatedResponse<>(resultPage);
-    }
-
-    @PostMapping("/{listingId}/toggle-favorite")
-    @Secured({Role.USER})
-    @Operation(
-        summary = "Toggle favorite listing",
-        description = "Marks/Unmarks a favorite listing",
-        security = {@SecurityRequirement(name = "bearerAuth")}
-    )
-    public ToggleFavoriteResponse toggleFavorite(
-        @PathVariable Long listingId,
-        @Parameter(hidden = true) @CurrentUser User user
-    ) {
-        boolean isFavorite = favoriteService.toggleFavorite(user.getId(), listingId);
-
-        return new ToggleFavoriteResponse(isFavorite);
     }
 }
